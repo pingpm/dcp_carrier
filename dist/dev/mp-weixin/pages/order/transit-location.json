@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "在途位置上报",
+  "usingComponents": {
+    "region-picker": "../../components/region-picker/region-picker"
+  }
+}

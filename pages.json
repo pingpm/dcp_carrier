@@ -1,0 +1,193 @@
+{
+  "pages": [
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationBarTitleText": "工作台"
+      }
+    },
+    {
+      "path": "pages/auth/login",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
+    },
+    {
+      "path": "pages/agreement/detail",
+      "style": {
+        "navigationBarTitleText": "协议详情"
+      }
+    },
+    {
+      "path": "pages/verification/status",
+      "style": {
+        "navigationBarTitleText": "认证状态"
+      }
+    },
+    {
+      "path": "pages/verification/form",
+      "style": {
+        "navigationBarTitleText": "承运商认证"
+      }
+    },
+    {
+      "path": "pages/order/list",
+      "style": {
+        "navigationBarTitleText": "订单列表"
+      }
+    },
+    {
+      "path": "pages/order/detail",
+      "style": {
+        "navigationBarTitleText": "订单详情"
+      }
+    },
+    {
+      "path": "pages/order/contract",
+      "style": {
+        "navigationBarTitleText": "确认合同"
+      }
+    },
+    {
+      "path": "pages/order/driver-form",
+      "style": {
+        "navigationBarTitleText": "设置司机"
+      }
+    },
+    {
+      "path": "pages/order/pickup",
+      "style": {
+        "navigationBarTitleText": "确认提车"
+      }
+    },
+    {
+      "path": "pages/order/transit-location",
+      "style": {
+        "navigationBarTitleText": "在途位置上报"
+      }
+    },
+    {
+      "path": "pages/order/handover",
+      "style": {
+        "navigationBarTitleText": "确认交车"
+      }
+    },
+    {
+      "path": "pages/order/cancel-request",
+      "style": {
+        "navigationBarTitleText": "发起取消"
+      }
+    },
+    {
+      "path": "pages/order/cancel-handle",
+      "style": {
+        "navigationBarTitleText": "处理取消"
+      }
+    },
+    {
+      "path": "pages/order/compensation-handle",
+      "style": {
+        "navigationBarTitleText": "处理赔付"
+      }
+    },
+    {
+      "path": "pages/route/list",
+      "style": {
+        "navigationBarTitleText": "线路管理"
+      }
+    },
+    {
+      "path": "pages/route/form",
+      "style": {
+        "navigationBarTitleText": "编辑线路"
+      }
+    },
+    {
+      "path": "pages/route/tier-template",
+      "style": {
+        "navigationBarTitleText": "阶梯价模板"
+      }
+    },
+    {
+      "path": "pages/wallet/index",
+      "style": {
+        "navigationBarTitleText": "钱包"
+      }
+    },
+    {
+      "path": "pages/wallet/recharge",
+      "style": {
+        "navigationBarTitleText": "钱包充值"
+      }
+    },
+    {
+      "path": "pages/wallet/recharge-records",
+      "style": {
+        "navigationBarTitleText": "充值记录"
+      }
+    },
+    {
+      "path": "pages/wallet/info-fee-deductions",
+      "style": {
+        "navigationBarTitleText": "扣费记录"
+      }
+    },
+    {
+      "path": "pages/wallet/transactions",
+      "style": {
+        "navigationBarTitleText": "全部流水"
+      }
+    },
+    {
+      "path": "pages/profile/company",
+      "style": {
+        "navigationBarTitleText": "企业介绍"
+      }
+    },
+    {
+      "path": "pages/account/index",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    },
+    {
+      "path": "pages/account/settings",
+      "style": {
+        "navigationBarTitleText": "设置"
+      }
+    }
+  ],
+  "tabBar": {
+    "color": "#6B7280",
+    "selectedColor": "#1677FF",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "工作台",
+        "iconPath": "static/carrier._tabbar_index.png",
+        "selectedIconPath": "static/carrier._tabbar_index_selected.png"
+      },
+      {
+        "pagePath": "pages/order/list",
+        "text": "订单",
+        "iconPath": "static/carrier._tabbar_order.png",
+        "selectedIconPath": "static/carrier._tabbar_order_selected.png"
+      },
+      {
+        "pagePath": "pages/account/index",
+        "text": "我的",
+        "iconPath": "static/carrier._tabbar_my.png",
+        "selectedIconPath": "static/carrier._tabbar_my_selected.png"
+      }
+    ]
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "承运商端",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F7FA"
+  },
+  "uniIdRouter": {}
+}

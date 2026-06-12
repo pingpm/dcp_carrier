@@ -1,0 +1,61 @@
+.wallet-recharge-page {
+  padding: 30rpx;
+  padding-bottom: calc(150rpx + env(safe-area-inset-bottom));
+}
+.form-header {
+  margin-bottom: 36rpx;
+  padding: 0 10rpx;
+}
+.form-header-title {
+  font-size: 38rpx;
+  font-weight: 800;
+  color: #111827;
+}
+.form-header-desc {
+  font-size: 24rpx;
+  color: #6b7280;
+  margin-top: 10rpx;
+  line-height: 1.5;
+}
+.required {
+  color: #ef4444;
+  margin-left: 6rpx;
+  font-weight: bold;
+}
+.radio-icon-box {
+  width: 32rpx;
+  height: 32rpx;
+  border: 2rpx solid #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16rpx;
+  color: transparent;
+}
+.checked .radio-icon-box {
+  border-color: #1677ff;
+  color: #1677ff;
+}
+
+/* Presets */
+.presets-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+.preset-item {
+  text-align: center;
+  padding: 24rpx 0;
+  border-radius: var(--radius-md);
+  border: 1rpx solid var(--border-color);
+  background: #f9fafb;
+  color: #4b5563;
+  font-size: 28rpx;
+  transition: all 0.2s ease;
+}
+.preset-item.active {
+  background: var(--primary-light);
+  border-color: #93c5fd;
+  color: var(--primary-color);
+}

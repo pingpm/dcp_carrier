@@ -1,0 +1,76 @@
+.recharge-records-page {
+  padding: 24rpx;
+}
+
+/* Segmented Control */
+.segmented-control {
+  display: flex;
+  padding: 8rpx !important;
+  background-color: #f1f5f9 !important;
+  border-radius: var(--radius-lg);
+}
+.segment-item {
+  flex: 1;
+  text-align: center;
+  font-size: 26rpx;
+  color: #4b5563;
+  font-weight: 600;
+  padding: 16rpx 0;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+.segment-item.active {
+  background-color: #ffffff;
+  color: #1677ff;
+  box-shadow: 0 4rpx 12rpx rgba(17, 24, 39, 0.05);
+}
+
+/* Cards */
+.record-card {
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  border: 1rpx solid rgba(229, 231, 235, 0.5);
+}
+.card-header {
+  border-bottom: 1rpx solid #f1f5f9;
+  padding-bottom: 16rpx;
+  margin-bottom: 20rpx;
+}
+.record-type-badge {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 6rpx;
+  font-weight: bold;
+  margin-right: 12rpx;
+}
+.record-type-badge.deposit {
+  background-color: #eff6ff;
+  color: #1677ff;
+}
+.record-type-badge.info_fee {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+.order-no-font {
+  font-size: 22rpx;
+  color: #9ca3af;
+  font-family: monospace;
+}
+.record-meta-row {
+  margin-bottom: 8rpx;
+}
+.record-time {
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+.record-amt {
+  font-size: 34rpx;
+  color: #10b981;
+}
+.record-paytime {
+  font-size: 20rpx;
+  color: #9ca3af;
+  margin-top: 10rpx;
+  border-top: 1rpx dashed #f3f4f6;
+  padding-top: 10rpx;
+}

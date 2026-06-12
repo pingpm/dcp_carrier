@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "编辑线路",
+  "usingComponents": {
+    "region-select-field": "../../components/region-select-field/region-select-field"
+  }
+}

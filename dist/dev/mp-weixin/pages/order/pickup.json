@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "确认提车",
+  "usingComponents": {
+    "region-picker": "../../components/region-picker/region-picker"
+  }
+}

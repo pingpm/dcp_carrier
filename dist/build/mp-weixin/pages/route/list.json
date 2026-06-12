@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "线路管理",
+  "usingComponents": {
+    "region-picker": "../../components/region-picker/region-picker"
+  }
+}

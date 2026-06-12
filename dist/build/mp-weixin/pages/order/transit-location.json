@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "在途位置上报",
+  "usingComponents": {
+    "address-map-picker": "../../components/address-map-picker/address-map-picker",
+    "region-select-field": "../../components/region-select-field/region-select-field"
+  }
+}

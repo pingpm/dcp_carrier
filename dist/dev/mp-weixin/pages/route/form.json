@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "编辑线路",
+  "usingComponents": {
+    "region-picker": "../../components/region-picker/region-picker"
+  }
+}

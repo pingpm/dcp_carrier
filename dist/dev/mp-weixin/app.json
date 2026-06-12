@@ -1,0 +1,62 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/auth/login",
+    "pages/agreement/detail",
+    "pages/verification/status",
+    "pages/verification/form",
+    "pages/order/list",
+    "pages/order/detail",
+    "pages/order/contract",
+    "pages/order/driver-form",
+    "pages/order/pickup",
+    "pages/order/transit-location",
+    "pages/order/handover",
+    "pages/order/cancel-request",
+    "pages/order/cancel-handle",
+    "pages/route/list",
+    "pages/route/form",
+    "pages/route/tier-template",
+    "pages/wallet/index",
+    "pages/wallet/recharge",
+    "pages/wallet/recharge-records",
+    "pages/wallet/info-fee-deductions",
+    "pages/wallet/transactions",
+    "pages/profile/company",
+    "pages/account/index",
+    "pages/account/settings"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "承运商端",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F7FA"
+  },
+  "tabBar": {
+    "color": "#6B7280",
+    "selectedColor": "#1677FF",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "工作台",
+        "iconPath": "static/carrier._tabbar_index.png",
+        "selectedIconPath": "static/carrier._tabbar_index_selected.png"
+      },
+      {
+        "pagePath": "pages/order/list",
+        "text": "订单",
+        "iconPath": "static/carrier._tabbar_order.png",
+        "selectedIconPath": "static/carrier._tabbar_order_selected.png"
+      },
+      {
+        "pagePath": "pages/account/index",
+        "text": "我的",
+        "iconPath": "static/carrier._tabbar_my.png",
+        "selectedIconPath": "static/carrier._tabbar_my_selected.png"
+      }
+    ]
+  },
+  "usingComponents": {}
+}

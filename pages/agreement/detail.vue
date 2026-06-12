@@ -1,0 +1,224 @@
+<template>
+  <view class="page agreement-page">
+    <view class="agreement-header">
+      <view class="agreement-kicker">承运商端协议</view>
+      <view class="agreement-title">{{ agreement.title }}</view>
+      <view class="agreement-meta">生效日期：2026-06-07</view>
+      <view class="agreement-summary">{{ agreement.summary }}</view>
+    </view>
+
+    <scroll-view class="agreement-scroll" scroll-y>
+      <view class="agreement-content">
+        <view v-for="section in agreement.sections" :key="section.heading" class="agreement-section">
+          <view class="section-heading">{{ section.heading }}</view>
+          <view v-for="paragraph in section.paragraphs" :key="paragraph" class="section-paragraph">
+            {{ paragraph }}
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+</template>
+
+<script>
+const agreements = {
+  terms: {
+    title: '承运商注册协议',
+    summary:
+      '本协议适用于承运商通过平台入驻认证、维护线路、确认订单、履约运输、充值钱包和查看流水。',
+    sections: [
+      {
+        heading: '一、账号注册与承运商身份',
+        paragraphs: [
+          '您使用手机号验证码登录时，平台将根据手机号为您创建或绑定承运商账号。请确保手机号由承运企业或经授权的运营人员使用。',
+          '同一手机号可分别注册车商端和承运商端账号，但承运商资质、线路、钱包、订单和履约记录相互独立。',
+          '您应妥善保管验证码、登录状态和设备访问权限。任何以您的账号完成的线路维护、订单确认、钱包充值或履约操作，均可能影响企业业务。',
+        ],
+      },
+      {
+        heading: '二、入驻认证与服务能力',
+        paragraphs: [
+          '您需按照平台要求提交企业名称、统一社会信用代码、法人或委托人资料、服务能力、道路运输经营许可证、办公地址和经营照片等资料。',
+          '您选择大板线路后，可维护大板线路；选择小板线路后，可维护小板线路。代驾能力为保留字段，本期不展示、不开放业务功能。',
+          '您提交的认证资料应真实、准确、完整且持续有效。资料虚假、过期、冒用或无法核验时，平台有权限制展示、接单、确认订单等能力。',
+        ],
+      },
+      {
+        heading: '三、线路维护与报价展示',
+        paragraphs: [
+          '您可在承运商端维护大板或小板线路、价格、时效和阶梯价模板。线路信息将影响车商搜索结果和订单发起决策。',
+          '未认证或认证未通过时，您可先维护线路，但线路不会对车商展示，也不能用于接单。',
+          '您应确保线路、报价、时效、服务能力和企业介绍真实可靠，不得发布虚假路线、误导报价或无法履约的运输能力。',
+        ],
+      },
+      {
+        heading: '四、订单确认与履约义务',
+        paragraphs: [
+          '车商支付担保交易费后，订单会进入待您确认状态。您确认订单前应核对车辆信息、起始地、目的地、运输方式、运费金额和约定送达时间。',
+          '确认订单后，您需按照平台节点完成合同确认、司机设置、提车验车、在途位置上报、交车凭证上传和取消协商等操作。',
+          '承运商确认订单时，平台会按规则扣除信息费。信息费余额不足或认证状态不符合要求时，您可能无法确认订单。',
+          '运费由您与车商线下结算，平台本期不代收运费。您应自行与车商确认结算方式、发票安排和交付凭证。',
+        ],
+      },
+      {
+        heading: '五、钱包、保证金与信息费',
+        paragraphs: [
+          '承运商钱包包含保证金余额和信息费余额。保证金低于平台规则要求时，您可能无法被车商搜索到。',
+          '信息费余额不足时，您可能无法确认订单；信息费余额为 0 时，车商联系您也可能被平台拦截。',
+          '您可通过在线充值或线下付款后由后台调账的方式补充余额。所有充值、扣费和调账会形成流水记录。',
+        ],
+      },
+      {
+        heading: '六、禁止行为与责任',
+        paragraphs: [
+          '您不得提交虚假资质、虚假线路、虚假履约照片或视频，不得恶意拒单、诱导车商绕过平台规则或破坏平台交易秩序。',
+          '因您提供资料不真实、线路信息错误、履约操作延误或未按约定交付车辆造成的损失，由您自行承担相应责任。',
+          '如您违反本协议或平台规则，平台有权限制线路展示、接单、确认订单、钱包操作、账号登录等能力，并保留依法追责的权利。',
+        ],
+      },
+    ],
+  },
+  privacy: {
+    title: '承运商隐私协议',
+    summary:
+      '本协议说明平台在承运商端收集、使用和保护企业资质、线路、钱包、订单履约和联系人信息的方式。',
+    sections: [
+      {
+        heading: '一、我们收集的信息',
+        paragraphs: [
+          '为完成登录注册，我们会收集您的手机号、验证码校验结果、登录 token、客户端类型和必要的设备访问日志。',
+          '为完成承运商入驻认证，我们会收集企业名称、统一社会信用代码、法人或委托人身份资料、授权书、道路运输经营许可证、办公地址和经营照片。',
+          '为支持线路和订单履约，我们会收集线路、报价、时效、服务能力、司机信息、提车验车照片或视频、在途位置、交车凭证和订单操作记录。',
+          '为支持钱包和财务核验，我们会收集充值记录、信息费扣费记录、钱包流水、支付流水、后台调账原因和相关凭证。',
+        ],
+      },
+      {
+        heading: '二、信息使用目的',
+        paragraphs: [
+          '我们会将收集的信息用于账号登录、身份核验、资质审核、线路展示、订单确认、履约跟踪、钱包充值、扣费计算和通知提醒。',
+          '我们会根据认证状态、服务能力、线路状态、保证金余额、信息费余额和订单状态判断您是否可以展示、接单或确认订单。',
+          '我们会对必要的操作记录进行留存，用于客服核验、争议处理、财务对账、安全审计和法律法规要求的合规留存。',
+        ],
+      },
+      {
+        heading: '三、信息共享与展示',
+        paragraphs: [
+          '当您的认证、钱包和线路符合平台规则时，您的企业名称、服务能力、线路、报价、时效和企业介绍可能展示给车商。',
+          '在订单确认、合同确认和履约沟通中，必要的承运商联系人、联系电话、司机信息、车辆交接凭证和位置节点可能展示给对应车商。',
+          '平台不会向无关第三方出售您的个人信息或企业资料。因支付、文件存储、通知发送等必要服务需要共享时，我们会限定共享范围。',
+        ],
+      },
+      {
+        heading: '四、信息存储与保护',
+        paragraphs: [
+          '我们会采取权限控制、访问日志、传输加密、文件存储隔离等方式保护您的信息安全。',
+          '身份证件、许可证、授权书、经营照片、验车照片或视频等文件将通过平台配置的对象存储服务保存，密钥不会写入客户端代码。',
+          '请避免在非官方页面、聊天工具或不可信设备中泄露验证码、账号、司机资料、钱包凭证和企业资质文件。',
+        ],
+      },
+      {
+        heading: '五、您的权利',
+        paragraphs: [
+          '您可以在平台页面查看账号、认证、线路、订单、钱包、通知设置等信息，并按照页面规则提交修改或重新认证。',
+          '如企业资料、线路报价、司机信息或钱包流水存在异常，请及时通过平台提供的客服或运营渠道联系我们处理。',
+          '在不影响订单履约、财务对账、争议处理和法定留存义务的前提下，您可申请更正、删除或限制使用相关信息。',
+        ],
+      },
+    ],
+  },
+};
+
+export default {
+  data() {
+    return {
+      type: 'terms',
+    };
+  },
+  computed: {
+    agreement() {
+      return agreements[this.type] || agreements.terms;
+    },
+  },
+  onLoad(options) {
+    this.type = options?.type === 'privacy' ? 'privacy' : 'terms';
+    uni.setNavigationBarTitle({ title: this.agreement.title });
+  },
+};
+</script>
+
+<style>
+.agreement-page {
+  display: flex;
+  flex-direction: column;
+  padding: 28rpx 24rpx;
+}
+
+.agreement-header {
+  padding: 34rpx 30rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+  border: 1rpx solid rgba(22, 119, 255, 0.16);
+  box-shadow: 0 10rpx 25rpx rgba(17, 24, 39, 0.03);
+}
+
+.agreement-kicker {
+  color: #1677ff;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+
+.agreement-title {
+  margin-top: 10rpx;
+  color: #111827;
+  font-size: 40rpx;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.agreement-meta {
+  margin-top: 12rpx;
+  color: #9ca3af;
+  font-size: 22rpx;
+}
+
+.agreement-summary {
+  margin-top: 20rpx;
+  color: #4b5563;
+  font-size: 26rpx;
+  line-height: 1.7;
+}
+
+.agreement-scroll {
+  height: calc(100vh - 300rpx);
+  margin-top: 24rpx;
+}
+
+.agreement-content {
+  padding: 30rpx;
+  border-radius: 20rpx;
+  background: #ffffff;
+  border: 1rpx solid rgba(229, 231, 235, 0.72);
+}
+
+.agreement-section {
+  margin-bottom: 34rpx;
+}
+
+.agreement-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-heading {
+  color: #111827;
+  font-size: 30rpx;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.section-paragraph {
+  margin-top: 14rpx;
+  color: #4b5563;
+  font-size: 26rpx;
+  line-height: 1.8;
+}
+</style>
