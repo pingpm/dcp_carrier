@@ -122,7 +122,11 @@ export default {
         .filter((province) => this.regionMatches(province, keyword))
         .map((province) => this.decorateItem(province, 'province'));
       const matchedCities = this.allCities
-        .filter((city) => this.regionMatches(city, keyword) || this.regionMatches(this.provinceMap[String(city.parentId)], keyword))
+        .filter(
+          (city) =>
+            this.regionMatches(city, keyword) ||
+            this.regionMatches(this.provinceMap[String(city.parentId)], keyword),
+        )
         .map((city) => this.decorateItem(city, 'city'));
 
       return [...matchedProvinces, ...matchedCities];
@@ -211,7 +215,9 @@ export default {
       this.searchKeyword = '';
     },
     normalizeKeyword(value) {
-      return String(value || '').trim().toLowerCase();
+      return String(value || '')
+        .trim()
+        .toLowerCase();
     },
     regionMatches(region, keyword) {
       if (!region) return false;
@@ -243,7 +249,10 @@ export default {
         this.activeTab = 'city';
         await this.loadCities(item.id);
       } else {
-        const province = this.selectedProvince?.id === item.parentId ? this.selectedProvince : this.provinceMap[String(item.parentId)];
+        const province =
+          this.selectedProvince?.id === item.parentId
+            ? this.selectedProvince
+            : this.provinceMap[String(item.parentId)];
         if (!province) {
           uni.showToast({ title: '未找到所属省份', icon: 'none' });
           return;
@@ -255,6 +264,8 @@ export default {
           provinceName: this.selectedProvince.regionName,
           cityId: item.id,
           cityName: item.regionName,
+          cityLongitude: item.longitude,
+          cityLatitude: item.latitude,
         });
         this.close();
       }

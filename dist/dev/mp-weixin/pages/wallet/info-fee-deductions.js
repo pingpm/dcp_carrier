@@ -16,7 +16,7 @@ const _sfc_main = {
     async load() {
       try {
         const res = await common_vendor.api.infoFeeDeductions();
-        this.deductions = res.items || [];
+        this.deductions = res.records || res.items || [];
       } catch (err) {
         console.error(err);
       }

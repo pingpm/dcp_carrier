@@ -109,36 +109,28 @@
           <text class="row-label">详细地址</text>
           <text class="row-value multiline-value">{{ addressText }}</text>
         </view>
-        <view class="info-row-item" v-if="coordinateText !== '-'">
-          <text class="row-label">经纬度</text>
-          <text class="row-value">{{ coordinateText }}</text>
-        </view>
       </view>
     </view>
 
     <view v-if="hasVerificationVersion" class="section info-card">
       <view class="section-title">身份认证信息</view>
       <view class="info-list">
-        <template v-if="verification.verificationMethod === 'AUTHORIZED_AGENT'">
-          <view class="info-row-item">
-            <text class="row-label">经办人姓名</text>
-            <text class="row-value">{{ safeText(verification.agentName) }}</text>
-          </view>
-          <view class="info-row-item">
-            <text class="row-label">经办人身份证号</text>
-            <text class="row-value">{{ safeText(verification.agentIdNumber) }}</text>
-          </view>
-        </template>
-        <template v-else>
-          <view class="info-row-item">
-            <text class="row-label">法人姓名</text>
-            <text class="row-value">{{ safeText(verification.legalRepresentativeName) }}</text>
-          </view>
-          <view class="info-row-item">
-            <text class="row-label">法人身份证号</text>
-            <text class="row-value">{{ safeText(verification.legalIdNumber) }}</text>
-          </view>
-        </template>
+        <view class="info-row-item">
+          <text class="row-label">法人姓名</text>
+          <text class="row-value">{{ safeText(verification.legalRepresentativeName) }}</text>
+        </view>
+        <view class="info-row-item">
+          <text class="row-label">法人身份证号</text>
+          <text class="row-value">{{ safeText(verification.legalIdNumber) }}</text>
+        </view>
+        <view class="info-row-item">
+          <text class="row-label">经办人姓名</text>
+          <text class="row-value">{{ safeText(verification.agentName) }}</text>
+        </view>
+        <view class="info-row-item">
+          <text class="row-label">经办人身份证号</text>
+          <text class="row-value">{{ safeText(verification.agentIdNumber) }}</text>
+        </view>
       </view>
 
       <view v-if="identityFiles.length" class="file-group">
@@ -283,14 +275,17 @@
       </button>
       <button v-else class="secondary-btn flex-1 animate-btn" @click="load">刷新状态</button>
     </view>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
+import { miniappLoginPageMixin } from '../../utils/miniapp-login-page.js';
 import { api, requireLogin } from '../../utils/api.js';
 import { dateText, reviewStatusText } from '../../utils/format.js';
 
 export default {
+  mixins: [miniappLoginPageMixin],
   data() {
     return {
       status: { reviewStatus: 'UNVERIFIED' },
@@ -321,9 +316,12 @@ export default {
       return this.filesByUsage('BUSINESS_LICENSE');
     },
     identityFiles() {
-      const legalFiles = this.filesByUsages(['LEGAL_ID_FRONT', 'LEGAL_ID_BACK']);
-      const agentFiles = this.filesByUsages(['AGENT_ID_FRONT', 'AGENT_ID_BACK']);
-      return this.verification.verificationMethod === 'AUTHORIZED_AGENT' ? agentFiles : legalFiles;
+      return this.filesByUsages([
+        'LEGAL_ID_FRONT',
+        'LEGAL_ID_BACK',
+        'AGENT_ID_FRONT',
+        'AGENT_ID_BACK',
+      ]);
     },
     authorizationLetterFiles() {
       return this.filesByUsage('AUTHORIZATION_LETTER');
@@ -348,12 +346,6 @@ export default {
       );
       return parts.length ? parts.join(' / ') : '-';
     },
-    coordinateText() {
-      if (!this.verification.officeLongitude || !this.verification.officeLatitude) {
-        return '-';
-      }
-      return `${this.verification.officeLongitude}, ${this.verification.officeLatitude}`;
-    },
     largeTruckLicense() {
       return this.verification.largeTruckLicense || {};
     },
@@ -371,6 +363,9 @@ export default {
     },
   },
   onShow() {
+    if (typeof uni.hideModal === 'function') {
+      uni.hideModal();
+    }
     if (requireLogin()) this.load();
   },
   methods: {
@@ -466,8 +461,8 @@ export default {
       return '';
     },
     companyTypeToCapabilities(type) {
-      if (type === 'CAR_CARRIER') return ['LARGE_TRUCK', 'SMALL_TRUCK'];
-      if (type === 'ROADSIDE_RESCUE') return ['SMALL_TRUCK'];
+      if (type === 'CAR_CARRIER') return ['LARGE_TRUCK', 'SMALL_TRUCK', 'DRIVING'];
+      if (type === 'ROADSIDE_RESCUE') return ['SMALL_TRUCK', 'DRIVING'];
       return [];
     },
     serviceCapabilitiesText(caps = []) {
@@ -521,7 +516,8 @@ export default {
 <style>
 .status-page {
   padding: 30rpx;
-  padding-bottom: calc(150rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(190rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(190rpx + constant(safe-area-inset-bottom));
   background: #f1f6fc;
 }
 

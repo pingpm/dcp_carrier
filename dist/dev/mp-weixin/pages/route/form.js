@@ -1,9 +1,10 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const RegionPicker = () => "../../components/region-picker/region-picker.js";
+const common_assets = require("../../common/assets.js");
+const RegionSelectField = () => "../../components/region-select-field/region-select-field.js";
 const _sfc_main = {
   components: {
-    RegionPicker
+    RegionSelectField
   },
   data() {
     return {
@@ -28,10 +29,6 @@ const _sfc_main = {
         durationText: "",
         status: "ACTIVE"
       },
-      // Region picker state
-      pickerType: "origin",
-      // origin | destination
-      pickerTitle: "选择出发省市",
       // Templates array
       templates: [],
       selectedTemplateName: "",
@@ -76,7 +73,6 @@ const _sfc_main = {
     },
     async loadDetail() {
       try {
-        const res = await common_vendor.api.routes({ id: this.routeId });
         const listRes = await common_vendor.api.routes();
         const route = (listRes.items || []).find((r) => String(r.id) === String(this.routeId));
         if (route) {
@@ -95,7 +91,7 @@ const _sfc_main = {
             startKm: route.startKm,
             tierTemplateId: route.tierTemplateId || "",
             durationText: route.durationText || "",
-            status: route.status || "ACTIVE"
+            status: route.routeStatus || "ACTIVE"
           };
           if (route.fixedPriceCent) {
             this.fixedPriceYuan = (route.fixedPriceCent / 100).toFixed(2);
@@ -125,23 +121,17 @@ const _sfc_main = {
         }
       }
     },
-    openRegionPicker(type) {
-      this.pickerType = type;
-      this.pickerTitle = type === "origin" ? "选择出发省市" : "选择目的省市";
-      this.$refs.regionPicker.open();
+    onOriginRegionSelect(region) {
+      this.form.originProvinceId = region.provinceId;
+      this.form.originProvinceName = region.provinceName;
+      this.form.originCityId = region.cityId;
+      this.form.originCityName = region.cityName;
     },
-    onRegionSelect(region) {
-      if (this.pickerType === "origin") {
-        this.form.originProvinceId = region.provinceId;
-        this.form.originProvinceName = region.provinceName;
-        this.form.originCityId = region.cityId;
-        this.form.originCityName = region.cityName;
-      } else {
-        this.form.destinationProvinceId = region.provinceId;
-        this.form.destinationProvinceName = region.provinceName;
-        this.form.destinationCityId = region.cityId;
-        this.form.destinationCityName = region.cityName;
-      }
+    onDestinationRegionSelect(region) {
+      this.form.destinationProvinceId = region.provinceId;
+      this.form.destinationProvinceName = region.provinceName;
+      this.form.destinationCityId = region.cityId;
+      this.form.destinationCityName = region.cityName;
     },
     onTemplateChange(e) {
       const idx = e.detail.value;
@@ -169,10 +159,6 @@ const _sfc_main = {
         common_vendor.index.showToast({ title: "请选择目的城市", icon: "none" });
         return false;
       }
-      if (!this.form.durationText.trim()) {
-        common_vendor.index.showToast({ title: "请输入预计运输时效", icon: "none" });
-        return false;
-      }
       if (this.routeType === "LARGE_TRUCK") {
         this.form.fixedPriceCent = this.fixedPriceYuan ? common_vendor.yuanToCent(this.fixedPriceYuan) : null;
       } else {
@@ -186,7 +172,12 @@ const _sfc_main = {
         return;
       this.submitting = true;
       try {
-        const payload = { ...this.form };
+        const payload = {
+          ...this.form,
+          routeStatus: this.form.status,
+          tierTemplateId: this.form.tierTemplateId || null
+        };
+        delete payload.status;
         if (this.routeType === "SMALL_TRUCK" && this.form.tierTemplateId) {
           const t = this.templates.find((x) => String(x.id) === String(this.form.tierTemplateId));
           if (t) {
@@ -212,63 +203,66 @@ const _sfc_main = {
   }
 };
 if (!Array) {
-  const _easycom_region_picker2 = common_vendor.resolveComponent("region-picker");
-  _easycom_region_picker2();
+  const _easycom_region_select_field2 = common_vendor.resolveComponent("region-select-field");
+  _easycom_region_select_field2();
 }
-const _easycom_region_picker = () => "../../components/region-picker/region-picker.js";
+const _easycom_region_select_field = () => "../../components/region-select-field/region-select-field.js";
 if (!Math) {
-  _easycom_region_picker();
+  _easycom_region_select_field();
 }
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
     a: common_vendor.t($data.routeId ? "修改线路报价" : "添加承运线路"),
-    b: common_vendor.t($data.routeType === "LARGE_TRUCK" ? "大板轿运线路" : "小板单车线路"),
-    c: $data.form.originProvinceName
-  }, $data.form.originProvinceName ? {
-    d: common_vendor.t($data.form.originProvinceName),
-    e: common_vendor.t($data.form.originCityName)
-  } : {}, {
-    f: common_vendor.o(($event) => $options.openRegionPicker("origin"), "68"),
-    g: $data.form.destinationProvinceName
-  }, $data.form.destinationProvinceName ? {
-    h: common_vendor.t($data.form.destinationProvinceName),
-    i: common_vendor.t($data.form.destinationCityName)
-  } : {}, {
-    j: common_vendor.o(($event) => $options.openRegionPicker("destination"), "2e"),
-    k: $data.form.durationText,
-    l: common_vendor.o(($event) => $data.form.durationText = $event.detail.value, "6b"),
-    m: $data.routeId
-  }, $data.routeId ? {
-    n: common_vendor.t($data.form.status === "ACTIVE" ? "●" : ""),
-    o: $data.form.status === "ACTIVE" ? 1 : "",
-    p: common_vendor.o(($event) => $options.setStatus("ACTIVE"), "78"),
-    q: common_vendor.t($data.form.status === "CLOSED" ? "●" : ""),
-    r: $data.form.status === "CLOSED" ? 1 : "",
-    s: common_vendor.o(($event) => $options.setStatus("CLOSED"), "f6")
-  } : {}, {
-    t: $data.routeType === "LARGE_TRUCK"
-  }, $data.routeType === "LARGE_TRUCK" ? {
-    v: $data.fixedPriceYuan,
-    w: common_vendor.o(($event) => $data.fixedPriceYuan = $event.detail.value, "f2")
-  } : {}, {
-    x: $data.routeType === "SMALL_TRUCK"
-  }, $data.routeType === "SMALL_TRUCK" ? {
-    y: $data.startPriceYuan,
-    z: common_vendor.o(($event) => $data.startPriceYuan = $event.detail.value, "0d"),
-    A: $data.form.startKm,
-    B: common_vendor.o(($event) => $data.form.startKm = $event.detail.value, "e5"),
-    C: common_vendor.t($data.selectedTemplateName || "点击选择公里阶梯价模板"),
-    D: $data.templates,
-    E: common_vendor.o((...args) => $options.onTemplateChange && $options.onTemplateChange(...args), "aa"),
-    F: common_vendor.o((...args) => $options.goTemplatePage && $options.goTemplatePage(...args), "3c")
-  } : {}, {
-    G: common_vendor.sr("regionPicker", "3f7861a2-0"),
-    H: common_vendor.o($options.onRegionSelect, "85"),
-    I: common_vendor.p({
-      title: $data.pickerTitle
+    b: common_vendor.t($data.routeType === "LARGE_TRUCK" ? "大板线路" : "小板线路"),
+    c: common_vendor.o($options.onOriginRegionSelect, "19"),
+    d: common_vendor.p({
+      label: "出发城市",
+      required: true,
+      title: "选择出发省市",
+      placeholder: "选择出发省份与城市",
+      ["province-name"]: $data.form.originProvinceName,
+      ["city-name"]: $data.form.originCityName
     }),
-    J: $data.submitting,
-    K: common_vendor.o((...args) => $options.submit && $options.submit(...args), "4b")
+    e: common_vendor.o($options.onDestinationRegionSelect, "b2"),
+    f: common_vendor.p({
+      label: "目的城市",
+      required: true,
+      title: "选择目的省市",
+      placeholder: "选择目的省份与城市",
+      ["province-name"]: $data.form.destinationProvinceName,
+      ["city-name"]: $data.form.destinationCityName
+    }),
+    g: $data.form.durationText,
+    h: common_vendor.o(($event) => $data.form.durationText = $event.detail.value, "a8"),
+    i: $data.routeId
+  }, $data.routeId ? {
+    j: common_vendor.t($data.form.status === "ACTIVE" ? "●" : ""),
+    k: $data.form.status === "ACTIVE" ? 1 : "",
+    l: common_vendor.o(($event) => $options.setStatus("ACTIVE"), "64"),
+    m: common_vendor.t($data.form.status === "CLOSED" ? "●" : ""),
+    n: $data.form.status === "CLOSED" ? 1 : "",
+    o: common_vendor.o(($event) => $options.setStatus("CLOSED"), "4b")
+  } : {}, {
+    p: $data.routeType === "LARGE_TRUCK"
+  }, $data.routeType === "LARGE_TRUCK" ? {
+    q: $data.fixedPriceYuan,
+    r: common_vendor.o(($event) => $data.fixedPriceYuan = $event.detail.value, "3b")
+  } : {}, {
+    s: $data.routeType === "SMALL_TRUCK"
+  }, $data.routeType === "SMALL_TRUCK" ? {
+    t: $data.startPriceYuan,
+    v: common_vendor.o(($event) => $data.startPriceYuan = $event.detail.value, "83"),
+    w: $data.form.startKm,
+    x: common_vendor.o(($event) => $data.form.startKm = $event.detail.value, "e3"),
+    y: common_vendor.t($data.selectedTemplateName || "点击选择公里阶梯价模板"),
+    z: $data.templates,
+    A: common_vendor.o((...args) => $options.onTemplateChange && $options.onTemplateChange(...args), "ed"),
+    B: common_assets._imports_4$1,
+    C: common_assets._imports_1,
+    D: common_vendor.o((...args) => $options.goTemplatePage && $options.goTemplatePage(...args), "84")
+  } : {}, {
+    E: $data.submitting,
+    F: common_vendor.o((...args) => $options.submit && $options.submit(...args), "17")
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

@@ -1,4 +1,8 @@
 {
   "navigationBarTitleText": "企业介绍",
-  "usingComponents": {}
+  "usingComponents": {
+    "address-map-picker": "../../components/address-map-picker/address-map-picker",
+    "region-select-field": "../../components/region-select-field/region-select-field",
+    "miniapp-login-sheet": "../../components/miniapp-login-sheet/miniapp-login-sheet"
+  }
 }

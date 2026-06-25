@@ -33,7 +33,6 @@
       <image class="empty-icon" src="/static/icons/package.svg" mode="aspectFit" />
       <text class="empty-text">您当前暂无该状态下的订单</text>
       <text class="empty-subtext">当有车商发起托运订单并指派给您时，订单将在此显示。</text>
-      <button class="primary-btn empty-btn" @click="goHome">返回工作台</button>
     </view>
 
     <!-- Order Cards -->
@@ -133,13 +132,6 @@
             </button>
           </block>
 
-          <!-- Status: PENDING_CONTRACT -->
-          <block v-else-if="order.orderStatus === 'PENDING_CONTRACT'">
-            <button class="primary-btn card-action-btn" @click="signContract(order)">
-              确认合同
-            </button>
-          </block>
-
           <!-- Status: PENDING_PICKUP -->
           <block v-else-if="order.orderStatus === 'PENDING_PICKUP'">
             <button class="secondary-btn card-action-btn" @click="setDriver(order)">
@@ -176,11 +168,13 @@
         </view>
       </view>
     </block>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
-import { api, getToken } from '../../utils/api.js';
+import { api, getToken, openLoginPrompt } from '../../utils/api.js';
+import MiniappLoginSheet from '../../components/miniapp-login-sheet/miniapp-login-sheet.vue';
 import {
   dateText,
   orderStatusText,
@@ -190,6 +184,9 @@ import {
 } from '../../utils/format.js';
 
 export default {
+  components: {
+    MiniappLoginSheet,
+  },
   data() {
     return {
       isLoggedIn: false,
@@ -201,12 +198,12 @@ export default {
       tabs: [
         { label: '全部', value: '' },
         { label: '待确认', value: 'PENDING_CONFIRM' },
-        { label: '待合同', value: 'PENDING_CONTRACT' },
         { label: '待提车', value: 'PENDING_PICKUP' },
         { label: '运输中', value: 'IN_TRANSIT' },
         { label: '待收车', value: 'PENDING_RECEIPT' },
         { label: '取消中', value: 'CANCEL_PENDING' },
         { label: '已完成', value: 'COMPLETED' },
+        { label: '已取消', value: 'CANCELED' },
       ],
     };
   },
@@ -284,11 +281,16 @@ export default {
     goDetail(orderId) {
       uni.navigateTo({ url: `/pages/order/detail?orderId=${orderId}` });
     },
-    goHome() {
-      uni.switchTab({ url: '/pages/home/index' });
-    },
     goLogin() {
-      uni.navigateTo({ url: '/pages/auth/login' });
+      // #ifdef MP-WEIXIN
+      this.$refs.loginSheet?.open('查看订单');
+      return;
+      // #endif
+      openLoginPrompt({ actionText: '查看订单' });
+    },
+    handleLoginSuccess() {
+      this.isLoggedIn = true;
+      this.load();
     },
     async contactDealer(order) {
       try {
@@ -307,9 +309,6 @@ export default {
       } catch (err) {
         // error toasts already handled
       }
-    },
-    signContract(order) {
-      uni.navigateTo({ url: `/pages/order/contract?orderId=${order.id}` });
     },
     setDriver(order) {
       uni.navigateTo({ url: `/pages/order/driver-form?orderId=${order.id}&driverType=PICKUP` });

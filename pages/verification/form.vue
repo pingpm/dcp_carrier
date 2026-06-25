@@ -27,6 +27,7 @@
                 <view class="company-type-tags">
                   <text class="company-type-tag">大板线路</text>
                   <text class="company-type-tag">小板线路</text>
+                  <text class="company-type-tag">代驾线路</text>
                 </view>
               </view>
               <image
@@ -50,9 +51,10 @@
                 <view class="company-type-title-row">
                   <text class="company-type-title">道路救援公司</text>
                 </view>
-                <text class="company-type-desc">仅道路救援车辆（小板车）运营。</text>
+                <text class="company-type-desc">道路救援车辆（小板车）及代驾服务运营。</text>
                 <view class="company-type-tags">
-                  <text class="company-type-tag">仅小板线路</text>
+                  <text class="company-type-tag">小板线路</text>
+                  <text class="company-type-tag">代驾线路</text>
                 </view>
               </view>
               <image
@@ -100,21 +102,39 @@
                 <text class="label">企业名称 <text class="required">*</text></text>
                 <input
                   class="input"
+                  :class="{ error: identityErrors.companyName }"
                   v-model="form.companyName"
+                  :adjust-position="false"
+                  always-embed
                   placeholder="请输入企业工商营业执照全称"
                   placeholder-style="color:#9ca3af"
+                  @input="clearIdentityError('companyName')"
+                  @confirm="checkCompanyNameUsed"
+                  @blur="checkCompanyNameUsed"
                 />
+                <text v-if="identityErrors.companyName" class="field-error-text">{{
+                  identityErrors.companyName
+                }}</text>
               </view>
 
               <view class="field">
                 <text class="label">统一社会信用代码 <text class="required">*</text></text>
                 <input
                   class="input"
+                  :class="{ error: identityErrors.creditCode }"
                   v-model="form.creditCode"
+                  :adjust-position="false"
+                  always-embed
                   placeholder="请输入18位统一社会信用代码"
                   placeholder-style="color:#9ca3af"
                   maxlength="18"
+                  @input="clearIdentityError('creditCode')"
+                  @confirm="checkCreditCodeUsed"
+                  @blur="checkCreditCodeUsed"
                 />
+                <text v-if="identityErrors.creditCode" class="field-error-text">{{
+                  identityErrors.creditCode
+                }}</text>
               </view>
 
               <view class="field">
@@ -122,6 +142,8 @@
                 <input
                   class="input"
                   v-model="form.legalRepresentativeName"
+                  :adjust-position="false"
+                  always-embed
                   placeholder="请输入法定代表人姓名"
                   placeholder-style="color:#9ca3af"
                 />
@@ -164,36 +186,14 @@
           </view>
         </view>
 
-        <!-- Verification Method -->
+        <!-- Identity Verification -->
         <view class="section">
-          <view class="section-title">身份认证方式 <text class="required">*</text></view>
-          <view class="grid-two identity-method-grid">
-            <view
-              class="check-row identity-method-card"
-              :class="{ checked: form.verificationMethod === 'LEGAL_REPRESENTATIVE' }"
-              @click="setVerificationMethod('LEGAL_REPRESENTATIVE')"
-            >
-              <text class="radio-icon-box">{{
-                form.verificationMethod === 'LEGAL_REPRESENTATIVE' ? '●' : ''
-              }}</text>
-              <text>法定代表人自办</text>
-            </view>
-            <view
-              class="check-row identity-method-card"
-              :class="{ checked: form.verificationMethod === 'AUTHORIZED_AGENT' }"
-              @click="setVerificationMethod('AUTHORIZED_AGENT')"
-            >
-              <text class="radio-icon-box">{{
-                form.verificationMethod === 'AUTHORIZED_AGENT' ? '●' : ''
-              }}</text>
-              <text>经办人/委托人办理</text>
-            </view>
+          <view class="section-title">身份认证资料 <text class="required">*</text></view>
+          <view class="subtle identity-hint">
+            法人与委托人资料均可填写和上传；至少提交一组身份证明资料（身份证号或身份证照片）。
           </view>
 
-          <view
-            v-if="form.verificationMethod === 'LEGAL_REPRESENTATIVE'"
-            class="identity-detail-block"
-          >
+          <view class="identity-detail-block">
             <view class="identity-detail-title">法人身份证件</view>
             <view class="grid-two">
               <!-- Front -->
@@ -204,7 +204,6 @@
                   usage-scene="IDENTITY_CARD"
                   add-text="上传人像面"
                   single
-                  required
                   :show-status="false"
                   :example-src="exampleImages.carrierIdentityCard"
                   @update:modelValue="setSingleFile('legalIdFrontFileId', $event)"
@@ -219,7 +218,6 @@
                   usage-scene="IDENTITY_CARD"
                   add-text="上传国徽面"
                   single
-                  required
                   :show-status="false"
                   :example-src="exampleImages.carrierIdentityCard"
                   @update:modelValue="setSingleFile('legalIdBackFileId', $event)"
@@ -228,10 +226,12 @@
             </view>
 
             <view class="field">
-              <text class="label">法人姓名 <text class="required">*</text></text>
+              <text class="label">法人姓名</text>
               <input
                 class="input readonly-input"
                 :value="form.legalRepresentativeName"
+                :adjust-position="false"
+                always-embed
                 placeholder="请先填写企业基本信息中的法人名称"
                 placeholder-style="color:#9ca3af"
                 disabled
@@ -239,10 +239,12 @@
             </view>
 
             <view class="field">
-              <text class="label">法人身份证号 <text class="required">*</text></text>
+              <text class="label">法人身份证号</text>
               <input
                 class="input"
                 v-model="form.legalIdNumber"
+                :adjust-position="false"
+                always-embed
                 placeholder="请输入法人18位身份证号"
                 placeholder-style="color:#9ca3af"
                 maxlength="18"
@@ -250,7 +252,7 @@
             </view>
           </view>
 
-          <view v-else class="identity-detail-block">
+          <view class="identity-detail-block">
             <view class="identity-detail-title">委托经办人信息</view>
             <view class="grid-two">
               <!-- Front -->
@@ -261,7 +263,6 @@
                   usage-scene="IDENTITY_CARD"
                   add-text="上传正面"
                   single
-                  required
                   :show-status="false"
                   :example-src="exampleImages.carrierIdentityCard"
                   @update:modelValue="setSingleFile('agentIdFrontFileId', $event)"
@@ -276,7 +277,6 @@
                   usage-scene="IDENTITY_CARD"
                   add-text="上传反面"
                   single
-                  required
                   :show-status="false"
                   :example-src="exampleImages.carrierIdentityCard"
                   @update:modelValue="setSingleFile('agentIdBackFileId', $event)"
@@ -285,20 +285,24 @@
             </view>
 
             <view class="field">
-              <text class="label">经办人姓名 <text class="required">*</text></text>
+              <text class="label">经办人姓名</text>
               <input
                 class="input"
                 v-model="form.agentName"
+                :adjust-position="false"
+                always-embed
                 placeholder="请输入经办人真实姓名"
                 placeholder-style="color:#9ca3af"
               />
             </view>
 
             <view class="field">
-              <text class="label">经办人身份证号 <text class="required">*</text></text>
+              <text class="label">经办人身份证号</text>
               <input
                 class="input"
                 v-model="form.agentIdNumber"
+                :adjust-position="false"
+                always-embed
                 placeholder="请输入经办人18位身份证号"
                 placeholder-style="color:#9ca3af"
                 maxlength="18"
@@ -313,7 +317,6 @@
                 usage-scene="AUTHORIZATION_LETTER"
                 add-text="上传委托书"
                 single
-                required
                 :show-status="false"
                 :example-src="exampleImages.carrierAuthorizationLetter"
                 @update:modelValue="setSingleFile('authorizationLetterFileId', $event)"
@@ -350,6 +353,8 @@
                 <input
                   class="input"
                   v-model="form.largeTruckLicense.ownerName"
+                  :adjust-position="false"
+                  always-embed
                   placeholder="请输入许可证上的业户名称"
                   placeholder-style="color:#9ca3af"
                 />
@@ -360,6 +365,8 @@
                 <input
                   class="input"
                   v-model="form.largeTruckLicense.licenseNo"
+                  :adjust-position="false"
+                  always-embed
                   placeholder="请输入道路运输经营许可证字号"
                   placeholder-style="color:#9ca3af"
                 />
@@ -407,22 +414,29 @@
       </view>
     </scroll-view>
 
-    <address-map-picker ref="addressMapPicker" title="选择详细地址" @select="confirmAddressPicker" />
+    <address-map-picker
+      ref="addressMapPicker"
+      title="选择详细地址"
+      @select="confirmAddressPicker"
+    />
 
     <!-- Fixed Action Footer -->
-    <view class="fixed-footer">
+    <view v-if="!keyboardVisible" class="fixed-footer">
       <button class="primary-btn" :loading="submitting" @click="submit">提交并申请认证</button>
     </view>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
+import { miniappLoginPageMixin } from '../../utils/miniapp-login-page.js';
 import AddressMapPicker from '../../components/address-map-picker/address-map-picker.vue';
 import CarrierImageUploader from '../../components/carrier-image-uploader/carrier-image-uploader.vue';
 import RegionSelectField from '../../components/region-select-field/region-select-field.vue';
 import { api, requireLogin } from '../../utils/api.js';
 
 export default {
+  mixins: [miniappLoginPageMixin],
   components: {
     AddressMapPicker,
     CarrierImageUploader,
@@ -437,7 +451,7 @@ export default {
         creditCode: '',
         legalRepresentativeName: '',
         businessLicenseFileId: '',
-        serviceCapabilities: [], // LARGE_TRUCK, SMALL_TRUCK
+        serviceCapabilities: [], // LARGE_TRUCK, SMALL_TRUCK, DRIVING
         verificationMethod: 'LEGAL_REPRESENTATIVE', // LEGAL_REPRESENTATIVE, AUTHORIZED_AGENT
         office: {
           provinceId: '',
@@ -482,6 +496,20 @@ export default {
         carrierRoadLicense: '',
         carrierOperationSite: '',
       },
+      identityChecking: {
+        companyName: false,
+        creditCode: false,
+      },
+      identityCheckedValue: {
+        companyName: '',
+        creditCode: '',
+      },
+      identityErrors: {
+        companyName: '',
+        creditCode: '',
+      },
+      keyboardVisible: false,
+      keyboardHeightChangeHandler: null,
       submitting: false,
     };
   },
@@ -502,10 +530,39 @@ export default {
     },
   },
   onLoad() {
+    if (typeof uni.hideModal === 'function') {
+      uni.hideModal();
+    }
     this.loadExampleImages();
     if (requireLogin()) this.loadDetail();
   },
+  onShow() {
+    this.bindKeyboardHeightChange();
+  },
+  onHide() {
+    this.unbindKeyboardHeightChange();
+  },
+  onUnload() {
+    this.unbindKeyboardHeightChange();
+  },
   methods: {
+    bindKeyboardHeightChange() {
+      if (this.keyboardHeightChangeHandler || typeof uni.onKeyboardHeightChange !== 'function') {
+        return;
+      }
+      this.keyboardHeightChangeHandler = (res) => {
+        this.keyboardVisible = Number(res?.height || 0) > 0;
+      };
+      uni.onKeyboardHeightChange(this.keyboardHeightChangeHandler);
+    },
+    unbindKeyboardHeightChange() {
+      if (!this.keyboardHeightChangeHandler || typeof uni.offKeyboardHeightChange !== 'function') {
+        return;
+      }
+      uni.offKeyboardHeightChange(this.keyboardHeightChangeHandler);
+      this.keyboardHeightChangeHandler = null;
+      this.keyboardVisible = false;
+    },
     async loadExampleImages() {
       try {
         const data = await api.exampleImageConfigs();
@@ -538,6 +595,54 @@ export default {
     },
     enabledExampleUrl(item) {
       return item?.enabled && item?.url ? item.url : '';
+    },
+    clearIdentityError(fieldName) {
+      this.identityErrors[fieldName] = '';
+      this.identityCheckedValue[fieldName] = '';
+    },
+    async checkCompanyNameUsed() {
+      const companyName = this.form.companyName.trim();
+      if (!companyName || this.identityChecking.companyName) return false;
+      if (this.identityCheckedValue.companyName === companyName) return false;
+      this.identityChecking.companyName = true;
+      try {
+        const result = await api.verificationIdentityCheck({ companyName });
+        this.identityCheckedValue.companyName = companyName;
+        if (result.companyNameUsed) {
+          this.identityErrors.companyName = '企业名称已被使用，请核对后更换';
+          uni.showToast({ title: this.identityErrors.companyName, icon: 'none' });
+          return true;
+        }
+        this.identityErrors.companyName = '';
+        return false;
+      } catch (error) {
+        return false;
+      } finally {
+        this.identityChecking.companyName = false;
+      }
+    },
+    async checkCreditCodeUsed() {
+      const creditCode = this.form.creditCode.trim();
+      if (!creditCode || creditCode.length !== 18 || this.identityChecking.creditCode) {
+        return false;
+      }
+      if (this.identityCheckedValue.creditCode === creditCode) return false;
+      this.identityChecking.creditCode = true;
+      try {
+        const result = await api.verificationIdentityCheck({ creditCode });
+        this.identityCheckedValue.creditCode = creditCode;
+        if (result.creditCodeUsed) {
+          this.identityErrors.creditCode = '统一社会信用代码已被使用，请核对后更换';
+          uni.showToast({ title: this.identityErrors.creditCode, icon: 'none' });
+          return true;
+        }
+        this.identityErrors.creditCode = '';
+        return false;
+      } catch (error) {
+        return false;
+      } finally {
+        this.identityChecking.creditCode = false;
+      }
     },
     async loadDetail() {
       try {
@@ -648,12 +753,9 @@ export default {
       this.form.serviceCapabilities = this.companyTypeToCapabilities(type);
     },
     companyTypeToCapabilities(type) {
-      if (type === 'CAR_CARRIER') return ['LARGE_TRUCK', 'SMALL_TRUCK'];
-      if (type === 'ROADSIDE_RESCUE') return ['SMALL_TRUCK'];
+      if (type === 'CAR_CARRIER') return ['LARGE_TRUCK', 'SMALL_TRUCK', 'DRIVING'];
+      if (type === 'ROADSIDE_RESCUE') return ['SMALL_TRUCK', 'DRIVING'];
       return [];
-    },
-    setVerificationMethod(method) {
-      this.form.verificationMethod = method;
     },
     onDateChange(e, key) {
       this.form.largeTruckLicense[key] = e.detail.value;
@@ -725,8 +827,16 @@ export default {
         uni.showToast({ title: '请输入企业名称', icon: 'none' });
         return false;
       }
+      if (this.identityErrors.companyName) {
+        uni.showToast({ title: this.identityErrors.companyName, icon: 'none' });
+        return false;
+      }
       if (!this.form.creditCode.trim() || this.form.creditCode.trim().length !== 18) {
         uni.showToast({ title: '请输入正确的18位信用代码', icon: 'none' });
+        return false;
+      }
+      if (this.identityErrors.creditCode) {
+        uni.showToast({ title: this.identityErrors.creditCode, icon: 'none' });
         return false;
       }
       if (!this.form.legalRepresentativeName.trim()) {
@@ -742,33 +852,29 @@ export default {
         return false;
       }
 
-      // Identity Check
-      if (this.form.verificationMethod === 'LEGAL_REPRESENTATIVE') {
-        if (!this.form.legalIdNumber.trim() || this.form.legalIdNumber.trim().length !== 18) {
-          uni.showToast({ title: '请输入正确的法人身份证号', icon: 'none' });
-          return false;
-        }
-        if (!this.form.legalIdFrontFileId || !this.form.legalIdBackFileId) {
-          uni.showToast({ title: '请上传法人身份证正反面照片', icon: 'none' });
-          return false;
-        }
-      } else {
-        if (!this.form.agentName.trim()) {
-          uni.showToast({ title: '请输入委托经办人姓名', icon: 'none' });
-          return false;
-        }
-        if (!this.form.agentIdNumber.trim() || this.form.agentIdNumber.trim().length !== 18) {
-          uni.showToast({ title: '请输入正确的经办人身份证号', icon: 'none' });
-          return false;
-        }
-        if (
-          !this.form.agentIdFrontFileId ||
-          !this.form.agentIdBackFileId ||
-          !this.form.authorizationLetterFileId
-        ) {
-          uni.showToast({ title: '请上传经办人正反面身份证和授权书', icon: 'none' });
-          return false;
-        }
+      const legalIdNumber = this.form.legalIdNumber.trim();
+      const agentIdNumber = this.form.agentIdNumber.trim();
+      if (legalIdNumber && legalIdNumber.length !== 18) {
+        uni.showToast({ title: '请输入正确的法人身份证号', icon: 'none' });
+        return false;
+      }
+      if (agentIdNumber && agentIdNumber.length !== 18) {
+        uni.showToast({ title: '请输入正确的经办人身份证号', icon: 'none' });
+        return false;
+      }
+
+      const hasLegalIdentity =
+        Boolean(legalIdNumber) ||
+        Boolean(this.form.legalIdFrontFileId || this.form.legalIdBackFileId);
+      const hasAgentIdentity =
+        Boolean(agentIdNumber) ||
+        Boolean(this.form.agentIdFrontFileId || this.form.agentIdBackFileId);
+      if (!hasLegalIdentity && !hasAgentIdentity) {
+        uni.showToast({
+          title: '请至少填写法人或经办人的身份证号，或上传对应身份证照片',
+          icon: 'none',
+        });
+        return false;
       }
 
       const office = this.form.office;
@@ -859,17 +965,14 @@ export default {
         payload.officeLongitude = office.locationLng;
         payload.officeLatitude = office.locationLat;
 
-        if (this.form.verificationMethod === 'LEGAL_REPRESENTATIVE') {
-          payload.legalIdNumber = this.form.legalIdNumber;
-          payload.legalIdFrontFileId = this.form.legalIdFrontFileId;
-          payload.legalIdBackFileId = this.form.legalIdBackFileId;
-        } else {
-          payload.agentName = this.form.agentName;
-          payload.agentIdNumber = this.form.agentIdNumber;
-          payload.agentIdFrontFileId = this.form.agentIdFrontFileId;
-          payload.agentIdBackFileId = this.form.agentIdBackFileId;
-          payload.authorizationLetterFileId = this.form.authorizationLetterFileId;
-        }
+        payload.legalIdNumber = this.form.legalIdNumber;
+        payload.legalIdFrontFileId = this.form.legalIdFrontFileId;
+        payload.legalIdBackFileId = this.form.legalIdBackFileId;
+        payload.agentName = this.form.agentName;
+        payload.agentIdNumber = this.form.agentIdNumber;
+        payload.agentIdFrontFileId = this.form.agentIdFrontFileId;
+        payload.agentIdBackFileId = this.form.agentIdBackFileId;
+        payload.authorizationLetterFileId = this.form.authorizationLetterFileId;
 
         if (this.form.serviceCapabilities.includes('LARGE_TRUCK')) {
           const license = this.form.largeTruckLicense;
@@ -1070,24 +1173,6 @@ export default {
   color: #1677ff;
 }
 
-.identity-method-grid {
-  margin-bottom: 28rpx;
-}
-
-.identity-method-card {
-  min-height: 110rpx;
-  padding: 22rpx 24rpx;
-  font-size: 28rpx;
-  line-height: 1.35;
-}
-
-.identity-method-card .radio-icon-box {
-  flex-shrink: 0;
-  width: 36rpx;
-  height: 36rpx;
-  font-size: 18rpx;
-}
-
 .identity-detail-block {
   padding-top: 28rpx;
   border-top: 1rpx solid #eef2f7;
@@ -1126,6 +1211,20 @@ export default {
 
 .material-fields .field:last-child {
   margin-bottom: 0;
+}
+
+.material-fields .input.error {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.field-error-text {
+  display: block;
+  margin-top: 10rpx;
+  color: #dc2626;
+  font-size: 22rpx;
+  line-height: 1.35;
 }
 
 .material-upload {
@@ -1167,5 +1266,4 @@ export default {
   font-size: 23rpx;
   line-height: 1.45;
 }
-
 </style>

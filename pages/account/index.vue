@@ -5,7 +5,7 @@
       <view class="avatar-wrap">
         <image
           class="avatar-img"
-          src="/static/default_avatar.png"
+          src="/static/icons/user.svg"
           mode="aspectFill"
         ></image>
       </view>
@@ -22,7 +22,7 @@
       <view class="avatar-wrap">
         <image
           class="avatar-img"
-          :src="userInfo.avatarUrl || '/static/default_avatar.png'"
+          :src="userInfo.avatarUrl || '/static/icons/user.svg'"
           mode="aspectFill"
         ></image>
       </view>
@@ -137,14 +137,19 @@
         </view>
       </view>
     </view>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
-import { api, getToken, clearSession } from '../../utils/api.js';
+import { api, getToken, clearSession, openLoginPrompt } from '../../utils/api.js';
 import { reviewStatusText } from '../../utils/format.js';
+import MiniappLoginSheet from '../../components/miniapp-login-sheet/miniapp-login-sheet.vue';
 
 export default {
+  components: {
+    MiniappLoginSheet,
+  },
   data() {
     return {
       isLoggedIn: false,
@@ -235,6 +240,10 @@ export default {
     },
     ensureLoggedIn(actionText) {
       if (!this.isLoggedIn) {
+        // #ifdef MP-WEIXIN
+        this.$refs.loginSheet?.open(actionText);
+        return false;
+        // #endif
         uni.showModal({
           title: '请先登录',
           content: `您当前尚未登录，登录后才可使用${actionText}功能。`,
@@ -309,7 +318,15 @@ export default {
       uni.navigateTo({ url: '/pages/account/settings' });
     },
     goLogin() {
-      uni.navigateTo({ url: '/pages/auth/login' });
+      // #ifdef MP-WEIXIN
+      this.$refs.loginSheet?.open('登录账号');
+      return;
+      // #endif
+      openLoginPrompt({ actionText: '登录账号' });
+    },
+    async handleLoginSuccess() {
+      this.isLoggedIn = true;
+      await Promise.all([this.fetchMe(), this.fetchWallet()]);
     },
   },
 };

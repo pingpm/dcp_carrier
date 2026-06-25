@@ -1,22 +1,18 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const RegionPicker = () => "../../components/region-picker/region-picker.js";
+const CarrierImageUploader = () => "../../components/carrier-image-uploader/carrier-image-uploader.js";
 const _sfc_main = {
   components: {
-    RegionPicker
+    CarrierImageUploader
   },
   data() {
     return {
       orderId: "",
-      handoverTime: "",
-      provinceId: "",
-      provinceName: "",
-      cityId: "",
-      cityName: "",
-      addressDetail: "",
       remark: "",
       photoFiles: [],
-      // Array of { fileId, fileUrl }
+      handoverExampleImage: "",
+      photoMinCount: 1,
+      photoMaxCount: 9,
       uploading: false,
       submitting: false
     };
@@ -25,67 +21,36 @@ const _sfc_main = {
     if (!common_vendor.requireLogin())
       return;
     this.orderId = options.orderId;
-    const d = /* @__PURE__ */ new Date();
-    this.handoverTime = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-    this.loadOrderDestination();
+    this.loadExampleImages();
+    this.loadMediaLimits();
+  },
+  computed: {
+    photoLimitTip() {
+      return `请上传${this.photoMinCount}-${this.photoMaxCount}张交收完好的现场照片或纸质签收单照片`;
+    }
   },
   methods: {
-    async loadOrderDestination() {
+    async loadExampleImages() {
       try {
-        const res = await common_vendor.api.orderDetail(this.orderId);
-        const order = res.order || {};
-        if (order.destination) {
-          const dest = order.destination;
-          this.provinceId = dest.provinceId || "";
-          this.provinceName = dest.provinceName || "";
-          this.cityId = dest.cityId || "";
-          this.cityName = dest.cityName || "";
-          this.addressDetail = dest.detail || dest.addressDetail || "";
-          return;
-        }
-        this.provinceId = order.destinationProvinceId || "";
-        this.provinceName = order.destinationProvinceName || "";
-        this.cityId = order.destinationCityId || "";
-        this.cityName = order.destinationCityName || "";
-        this.addressDetail = order.destinationAddressDetail || "";
-      } catch (err) {
+        const data = await common_vendor.api.exampleImageConfigs();
+        const item = (data.items || []).find(
+          (config) => config.urlKey === "carrier_handover_photo_example_url"
+        );
+        this.handoverExampleImage = (item == null ? void 0 : item.enabled) && (item == null ? void 0 : item.url) ? item.url : "";
+      } catch (error) {
+        this.handoverExampleImage = "";
       }
     },
-    onDateChange(e) {
-      this.handoverTime = e.detail.value;
-    },
-    openRegionPicker() {
-      this.$refs.regionPicker.open();
-    },
-    onRegionSelect(region) {
-      this.provinceId = region.provinceId;
-      this.provinceName = region.provinceName;
-      this.cityId = region.cityId;
-      this.cityName = region.cityName;
-    },
-    previewImg(url) {
-      common_vendor.index.previewImage({ urls: [url] });
-    },
-    chooseMedia() {
-      if (this.uploading)
-        return;
-      common_vendor.index.chooseImage({
-        count: 9 - this.photoFiles.length,
-        success: async (res) => {
-          this.uploading = true;
-          try {
-            for (const path of res.tempFilePaths) {
-              const file = await common_vendor.uploadFile(path, "IMAGE", "HANDOVER_VERIFICATION");
-              this.photoFiles.push({ fileId: file.fileId, fileUrl: file.fileUrl });
-            }
-          } finally {
-            this.uploading = false;
-          }
-        }
-      });
-    },
-    deleteFile(index) {
-      this.photoFiles.splice(index, 1);
+    async loadMediaLimits() {
+      try {
+        const data = await common_vendor.api.carrierOrderMediaLimits();
+        const handover = data.handover || {};
+        this.photoMinCount = Number(handover.minCount) || 1;
+        this.photoMaxCount = Number(handover.maxCount) || 9;
+      } catch (error) {
+        this.photoMinCount = 1;
+        this.photoMaxCount = 9;
+      }
     },
     async useDevHandoverPhotos() {
       if (this.uploading)
@@ -104,20 +69,12 @@ const _sfc_main = {
       }
     },
     validate() {
-      if (!this.handoverTime) {
-        common_vendor.index.showToast({ title: "请选择交车时间", icon: "none" });
+      if (this.photoFiles.length < this.photoMinCount) {
+        common_vendor.index.showToast({ title: `请至少上传${this.photoMinCount}张交收签收照片凭证`, icon: "none" });
         return false;
       }
-      if (!this.provinceName || !this.cityName) {
-        common_vendor.index.showToast({ title: "请选择送达省市", icon: "none" });
-        return false;
-      }
-      if (!this.addressDetail.trim()) {
-        common_vendor.index.showToast({ title: "请输入交车详细地址", icon: "none" });
-        return false;
-      }
-      if (!this.photoFiles.length) {
-        common_vendor.index.showToast({ title: "请至少上传一张交收签收照片凭证", icon: "none" });
+      if (this.photoFiles.length > this.photoMaxCount) {
+        common_vendor.index.showToast({ title: `最多上传${this.photoMaxCount}张交收签收照片凭证`, icon: "none" });
         return false;
       }
       return true;
@@ -128,14 +85,6 @@ const _sfc_main = {
       this.submitting = true;
       try {
         const payload = {
-          handoverTime: new Date(this.handoverTime).toISOString(),
-          address: {
-            provinceId: this.provinceId,
-            provinceName: this.provinceName,
-            cityId: this.cityId,
-            cityName: this.cityName,
-            detail: this.addressDetail
-          },
           photoFileIds: this.photoFiles.map((f) => f.fileId),
           remark: this.remark
         };
@@ -153,51 +102,33 @@ const _sfc_main = {
   }
 };
 if (!Array) {
-  const _easycom_region_picker2 = common_vendor.resolveComponent("region-picker");
-  _easycom_region_picker2();
+  const _easycom_carrier_image_uploader2 = common_vendor.resolveComponent("carrier-image-uploader");
+  _easycom_carrier_image_uploader2();
 }
-const _easycom_region_picker = () => "../../components/region-picker/region-picker.js";
+const _easycom_carrier_image_uploader = () => "../../components/carrier-image-uploader/carrier-image-uploader.js";
 if (!Math) {
-  _easycom_region_picker();
+  _easycom_carrier_image_uploader();
 }
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return common_vendor.e({
-    a: common_vendor.t($data.handoverTime || "选择交车日期"),
-    b: common_vendor.o((...args) => $options.onDateChange && $options.onDateChange(...args), "ea"),
-    c: $data.provinceName
-  }, $data.provinceName ? {
-    d: common_vendor.t($data.provinceName),
-    e: common_vendor.t($data.cityName)
-  } : {}, {
-    f: common_vendor.o((...args) => $options.openRegionPicker && $options.openRegionPicker(...args), "0a"),
-    g: $data.addressDetail,
-    h: common_vendor.o(($event) => $data.addressDetail = $event.detail.value, "64"),
-    i: $data.remark,
-    j: common_vendor.o(($event) => $data.remark = $event.detail.value, "3e"),
-    k: common_vendor.t($data.photoFiles.length),
-    l: common_vendor.n($data.photoFiles.length ? "status-success" : "status-warning"),
-    m: common_vendor.f($data.photoFiles, (file, index, i0) => {
-      return {
-        a: file.fileUrl,
-        b: common_vendor.o(($event) => $options.previewImg(file.fileUrl), file.fileId),
-        c: common_vendor.o(($event) => $options.deleteFile(index), file.fileId),
-        d: file.fileId
-      };
+  return {
+    a: common_vendor.o(($event) => $data.uploading = $event, "c6"),
+    b: common_vendor.o(($event) => $data.photoFiles = $event, "05"),
+    c: common_vendor.p({
+      title: "交车凭证照片",
+      tip: $options.photoLimitTip,
+      ["usage-scene"]: "HANDOVER_PHOTO",
+      ["max-count"]: $data.photoMaxCount,
+      ["add-text"]: "添加图片",
+      required: true,
+      compact: true,
+      ["example-src"]: $data.handoverExampleImage,
+      modelValue: $data.photoFiles
     }),
-    n: $data.photoFiles.length < 9
-  }, $data.photoFiles.length < 9 ? {
-    o: common_vendor.t($data.uploading ? "⏳" : "+"),
-    p: common_vendor.t($data.uploading ? "上传中..." : "添加图片"),
-    q: common_vendor.o((...args) => $options.chooseMedia && $options.chooseMedia(...args), "e1")
-  } : {}, {
-    r: common_vendor.sr("regionPicker", "2a4b933c-0"),
-    s: common_vendor.o($options.onRegionSelect, "f0"),
-    t: common_vendor.p({
-      title: "选择交车省市"
-    }),
-    v: $data.submitting,
-    w: common_vendor.o((...args) => $options.submit && $options.submit(...args), "78")
-  });
+    d: $data.remark,
+    e: common_vendor.o(($event) => $data.remark = $event.detail.value, "95"),
+    f: $data.submitting,
+    g: common_vendor.o((...args) => $options.submit && $options.submit(...args), "01")
+  };
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);
 wx.createPage(MiniProgramPage);

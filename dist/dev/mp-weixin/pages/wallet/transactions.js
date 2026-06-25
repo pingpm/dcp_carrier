@@ -23,7 +23,7 @@ const _sfc_main = {
         if (this.filterWalletType)
           params.walletType = this.filterWalletType;
         const res = await common_vendor.api.walletTransactions(params);
-        this.transactions = res.items || [];
+        this.transactions = res.records || res.items || [];
       } catch (err) {
         console.error(err);
       }

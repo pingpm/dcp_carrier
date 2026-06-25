@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   data() {
     return {
@@ -43,14 +44,15 @@ const _sfc_main = {
 };
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
-    a: $data.isDirect
+    a: common_assets._imports_3,
+    b: $data.isDirect
   }, $data.isDirect ? {} : {}, {
-    b: $data.cancelReason,
-    c: common_vendor.o(($event) => $data.cancelReason = $event.detail.value, "80"),
-    d: common_vendor.t($data.cancelReason.length),
-    e: common_vendor.t($data.isDirect ? "拒绝接单并取消" : "发起取消协商申请"),
-    f: $data.submitting,
-    g: common_vendor.o((...args) => $options.submit && $options.submit(...args), "70")
+    c: $data.cancelReason,
+    d: common_vendor.o(($event) => $data.cancelReason = $event.detail.value, "01"),
+    e: common_vendor.t($data.cancelReason.length),
+    f: common_vendor.t($data.isDirect ? "拒绝接单并取消" : "发起取消协商申请"),
+    g: $data.submitting,
+    h: common_vendor.o((...args) => $options.submit && $options.submit(...args), "7d")
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

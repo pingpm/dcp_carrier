@@ -1,9 +1,10 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   data() {
     return {
-      phone: "13800000001",
+      phone: "",
       verificationCode: "",
       loading: false,
       codeLoading: false,
@@ -43,7 +44,7 @@ const _sfc_main = {
       this.codeLoading = true;
       try {
         const data = await common_vendor.api.sendLoginCode(this.phone);
-        let title = data.mockSent ? "验证码已模拟发送" : "验证码已发送";
+        let title = "验证码短信已发送";
         if (data.isRegistered === false) {
           title += "（新手机号登录将自动注册）";
         }
@@ -73,7 +74,8 @@ const _sfc_main = {
       }
       this.loading = true;
       try {
-        const data = await common_vendor.api.login(this.phone, this.verificationCode);
+        const wxCode = await common_vendor.miniappLoginCode();
+        const data = wxCode ? await common_vendor.api.loginWithWechatCode(this.phone, this.verificationCode, wxCode) : await common_vendor.api.login(this.phone, this.verificationCode);
         common_vendor.setSession(data);
         common_vendor.goAfterLogin(data);
       } finally {
@@ -84,20 +86,21 @@ const _sfc_main = {
 };
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return {
-    a: $data.phone,
-    b: common_vendor.o(($event) => $data.phone = $event.detail.value, "f4"),
-    c: $data.verificationCode,
-    d: common_vendor.o(($event) => $data.verificationCode = $event.detail.value, "3f"),
-    e: common_vendor.t($data.countdown > 0 ? `${$data.countdown}s` : "获取验证码"),
-    f: $data.codeLoading || $data.countdown > 0,
-    g: common_vendor.o((...args) => $options.sendCode && $options.sendCode(...args), "9b"),
-    h: $data.loading,
-    i: common_vendor.o((...args) => $options.login && $options.login(...args), "a6"),
-    j: $data.agreementAccepted,
-    k: common_vendor.o((...args) => $options.toggleAgreement && $options.toggleAgreement(...args), "19"),
-    l: common_vendor.o(($event) => $options.openAgreement("terms"), "70"),
-    m: common_vendor.o(($event) => $options.openAgreement("privacy"), "89"),
-    n: common_vendor.o((...args) => $options.toggleAgreement && $options.toggleAgreement(...args), "1c")
+    a: common_assets._imports_1$1,
+    b: $data.phone,
+    c: common_vendor.o(($event) => $data.phone = $event.detail.value, "d2"),
+    d: $data.verificationCode,
+    e: common_vendor.o(($event) => $data.verificationCode = $event.detail.value, "3d"),
+    f: common_vendor.t($data.countdown > 0 ? `${$data.countdown}s` : "获取验证码"),
+    g: $data.codeLoading || $data.countdown > 0,
+    h: common_vendor.o((...args) => $options.sendCode && $options.sendCode(...args), "ab"),
+    i: $data.loading,
+    j: common_vendor.o((...args) => $options.login && $options.login(...args), "09"),
+    k: $data.agreementAccepted,
+    l: common_vendor.o((...args) => $options.toggleAgreement && $options.toggleAgreement(...args), "cd"),
+    m: common_vendor.o(($event) => $options.openAgreement("terms"), "18"),
+    n: common_vendor.o(($event) => $options.openAgreement("privacy"), "55"),
+    o: common_vendor.o((...args) => $options.toggleAgreement && $options.toggleAgreement(...args), "6b")
   };
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

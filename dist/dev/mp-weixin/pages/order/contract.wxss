@@ -12,7 +12,9 @@
   gap: 20rpx;
 }
 .doc-badge {
-  font-size: 54rpx;
+  width: 56rpx;
+  height: 56rpx;
+  flex-shrink: 0;
 }
 .doc-meta {
   display: flex;
@@ -136,6 +138,22 @@
 }
 .sig-flow-label {
   color: var(--text-muted);
+}
+.deadline-text {
+  color: #111827;
+  font-weight: 700;
+}
+.deadline-expired {
+  color: #dc2626;
+}
+.deadline-tip {
+  margin-top: 16rpx;
+  padding: 18rpx 20rpx;
+  border-radius: var(--radius-sm);
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 24rpx;
+  line-height: 1.6;
 }
 .confirm-contract-btn {
   width: 100%;

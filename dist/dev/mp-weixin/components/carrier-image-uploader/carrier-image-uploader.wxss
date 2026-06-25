@@ -1,0 +1,78 @@
+.carrier-image-uploader {
+  width: 100%;
+  margin-bottom: 24rpx;
+}
+.carrier-image-uploader.compact {
+  margin-bottom: 0;
+}
+.uploader-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20rpx;
+  margin-bottom: 16rpx;
+}
+.uploader-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+.uploader-title {
+  display: block;
+  color: var(--text-main);
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+.uploader-tip {
+  display: block;
+  font-size: 22rpx;
+  color: var(--text-weak);
+  margin-top: -6rpx;
+  line-height: 1.4;
+}
+.required {
+  color: #ef4444;
+  margin-left: 6rpx;
+  font-weight: bold;
+}
+.upload-grid-single {
+  width: 100%;
+  margin-top: 12rpx;
+}
+.upload-grid-single .upload-card,
+.upload-grid-single .upload-preview,
+.upload-grid-single .example-card {
+  width: 200rpx;
+  height: 200rpx;
+}
+.upload-card.disabled {
+  opacity: 0.6;
+}
+.example-card {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #eff6ff;
+  border: 1rpx solid #bfdbfe;
+}
+.example-img {
+  width: 100%;
+  height: 100%;
+}
+.example-mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  min-height: 42rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 64, 175, 0.78);
+}
+.example-text {
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: 600;
+}

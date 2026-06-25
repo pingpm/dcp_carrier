@@ -317,6 +317,19 @@ button {
   flex-shrink: 0;
 }
 
+.notice-icon-img,
+.inline-icon {
+  width: 32rpx;
+  height: 32rpx;
+  flex-shrink: 0;
+}
+
+.arrow-icon {
+  width: 24rpx;
+  height: 24rpx;
+  flex-shrink: 0;
+}
+
 .notice-text {
   flex: 1;
   font-weight: 500;
@@ -344,10 +357,13 @@ button {
 }
 
 .empty::before {
-  content: '📁';
+  content: '';
+  width: 84rpx;
+  height: 84rpx;
   font-size: 80rpx;
   margin-bottom: 20rpx;
   opacity: 0.6;
+  background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjOTRhM2I4IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CiAgPHBhdGggZD0iTTIwIDIwYTIgMiAwIDAgMCAyLTJWOGEyIDIgMCAwIDAtMi0yaC03LjlhMiAyIDAgMCAxLTEuNy0uOUw5LjYgMy45QTIgMiAwIDAgMCA3LjkgM0g0YTIgMiAwIDAgMC0yIDJ2MTNhMiAyIDAgMCAwIDIgMloiLz4KPC9zdmc+Cg==') center / contain no-repeat;
 }
 
 /* Sticky Footer */
@@ -392,8 +408,38 @@ button {
 }
 
 .upload-card-icon {
-  font-size: 48rpx;
+  position: relative;
+  width: 44rpx;
+  height: 44rpx;
   margin-bottom: 8rpx;
+}
+
+.upload-card-icon::before,
+.upload-card-icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34rpx;
+  height: 4rpx;
+  border-radius: 4rpx;
+  background: #94a3b8;
+  transform: translate(-50%, -50%);
+}
+
+.upload-card-icon::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.upload-card-icon.loading {
+  border: 4rpx solid #dbeafe;
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+}
+
+.upload-card-icon.loading::before,
+.upload-card-icon.loading::after {
+  display: none;
 }
 
 .upload-card-text {

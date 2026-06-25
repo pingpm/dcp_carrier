@@ -47,14 +47,17 @@
         确认提车并起运
       </button>
     </view>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
+import { miniappLoginPageMixin } from '../../utils/miniapp-login-page.js';
 import CarrierImageUploader from '../../components/carrier-image-uploader/carrier-image-uploader.vue';
 import { api, requireLogin } from '../../utils/api.js';
 
 export default {
+  mixins: [miniappLoginPageMixin],
   components: {
     CarrierImageUploader,
   },

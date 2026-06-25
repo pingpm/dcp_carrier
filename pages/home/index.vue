@@ -42,12 +42,6 @@
           </view>
           <text class="todo-label">待确认</text>
         </view>
-        <view class="todo-item" @click="goOrders('PENDING_CONTRACT')">
-          <view class="todo-val font-bold" :class="{ highlight: todoCounts.pendingContract > 0 }">
-            {{ todoCounts.pendingContract || 0 }}
-          </view>
-          <text class="todo-label">待签合同</text>
-        </view>
         <view class="todo-item" @click="goOrders('PENDING_PICKUP')">
           <view class="todo-val font-bold" :class="{ highlight: todoCounts.pendingPickup > 0 }">
             {{ todoCounts.pendingPickup || 0 }}
@@ -117,14 +111,19 @@
         </view>
       </view>
     </view>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
-import { api, getToken } from '../../utils/api.js';
+import { api, getToken, openLoginPrompt } from '../../utils/api.js';
 import { yuanText, reviewStatusText } from '../../utils/format.js';
+import MiniappLoginSheet from '../../components/miniapp-login-sheet/miniapp-login-sheet.vue';
 
 export default {
+  components: {
+    MiniappLoginSheet,
+  },
   data() {
     return {
       isLoggedIn: false,
@@ -260,6 +259,9 @@ export default {
         cancelText: '稍后认证',
         success: (res) => {
           if (res.confirm) {
+            if (typeof uni.hideModal === 'function') {
+              uni.hideModal();
+            }
             this.goVerification();
           }
         },
@@ -299,7 +301,15 @@ export default {
       uni.navigateTo({ url: '/pages/route/list' });
     },
     goLogin() {
-      uni.navigateTo({ url: '/pages/auth/login' });
+      // #ifdef MP-WEIXIN
+      this.$refs.loginSheet?.open('查看工作台');
+      return;
+      // #endif
+      openLoginPrompt({ actionText: '查看工作台' });
+    },
+    handleLoginSuccess() {
+      this.isLoggedIn = true;
+      this.loadData();
     },
   },
 };
@@ -318,14 +328,16 @@ export default {
 }
 
 .todo-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10rpx;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
   margin-top: 10rpx;
 }
 
 .todo-item {
   display: flex;
+  flex: 1;
+  min-width: 0;
   flex-direction: column;
   align-items: center;
   text-align: center;
@@ -348,6 +360,9 @@ export default {
 .todo-label {
   font-size: 22rpx;
   color: #6b7280;
+  width: 100%;
+  line-height: 32rpx;
+  white-space: nowrap;
 }
 
 .summary-header {

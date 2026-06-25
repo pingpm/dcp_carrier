@@ -9,7 +9,7 @@
         @click="goOrder(item.relatedOrderId)"
       >
         <view class="row-between card-header">
-          <text class="order-no-font">关联订单ID: {{ item.relatedOrderId }}</text>
+          <text class="order-no-font">关联订单号: {{ item.relatedOrderNo || '-' }}</text>
           <text class="status-tag status-danger font-bold">- {{ yuanText(item.amountCent) }}</text>
         </view>
         <view class="detail-grid-info">
@@ -32,14 +32,17 @@
         </view>
       </view>
     </view>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
+import { miniappLoginPageMixin } from '../../utils/miniapp-login-page.js';
 import { api, requireLogin } from '../../utils/api.js';
 import { dateText, yuanText } from '../../utils/format.js';
 
 export default {
+  mixins: [miniappLoginPageMixin],
   data() {
     return {
       deductions: [],

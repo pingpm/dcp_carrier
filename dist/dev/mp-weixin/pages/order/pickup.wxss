@@ -16,24 +16,6 @@
   margin-top: 10rpx;
   line-height: 1.5;
 }
-.required {
-  color: #ef4444;
-  margin-left: 6rpx;
-  font-weight: bold;
-}
-.upload-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20rpx;
-}
-.upload-tip {
-  display: block;
-  font-size: 22rpx;
-  color: var(--text-weak);
-  margin-top: 6rpx;
-  line-height: 1.4;
-}
 .dev-upload-btn {
   margin-top: 20rpx;
   width: 100%;

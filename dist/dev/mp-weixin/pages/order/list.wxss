@@ -58,10 +58,11 @@
   align-items: center;
   text-align: center;
 }
-.empty-emoji {
-  font-size: 100rpx;
+.empty-icon {
+  width: 104rpx;
+  height: 104rpx;
   margin-bottom: 24rpx;
-  opacity: 0.6;
+  opacity: 0.7;
 }
 .empty-text {
   font-size: 28rpx;
@@ -104,7 +105,9 @@
   gap: 12rpx;
 }
 .dealer-icon {
-  font-size: 28rpx;
+  width: 32rpx;
+  height: 32rpx;
+  flex-shrink: 0;
 }
 .dealer-company-name {
   font-size: 28rpx;
@@ -139,17 +142,39 @@
   padding: 24rpx 0;
   display: flex;
   flex-direction: column;
-  gap: 6rpx;
+  position: relative;
 }
 .route-point-row {
   display: flex;
   align-items: center;
   gap: 16rpx;
 }
+.route-point-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+.route-point-block + .route-point-block {
+  margin-top: 28rpx;
+}
 .route-bullet {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 8rpx;
+  color: #ffffff;
   font-size: 20rpx;
-  width: 24rpx;
+  font-weight: 800;
+  line-height: 36rpx;
   text-align: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+.route-bullet.origin {
+  background: linear-gradient(135deg, #38bdf8, #1677ff);
+}
+.route-bullet.destination {
+  background: linear-gradient(135deg, #fb7185, #ef4444);
 }
 .route-city-lbl {
   font-size: 28rpx;
@@ -160,11 +185,48 @@
   font-size: 24rpx;
   color: #9ca3af;
 }
-.route-arrow-line {
-  padding-left: 20rpx;
+.route-connector-line {
+  width: 2rpx;
+  position: absolute;
+  left: 17rpx;
+  top: 60rpx;
+  height: 78rpx;
+  background: #cbd5e1;
+  border-radius: 2rpx;
+  z-index: 1;
+}
+.route-service-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  min-width: 0;
+  padding-left: 40rpx;
+}
+.service-tag {
+  flex-shrink: 0;
+  min-width: 86rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 6rpx;
+  background: #f3f4f6;
+  color: #9ca3af;
   font-size: 20rpx;
-  color: #d1d5db;
-  line-height: 1;
+  font-weight: 700;
+  text-align: center;
+}
+.service-tag.active {
+  background: #eff6ff;
+  color: #1677ff;
+}
+.service-address {
+  flex: 1;
+  min-width: 0;
+  color: #4b5563;
+  font-size: 22rpx;
+}
+.one-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .vehicles-summary-row {
   display: flex;
@@ -177,7 +239,9 @@
   margin-bottom: 20rpx;
 }
 .car-icon {
-  font-size: 26rpx;
+  width: 28rpx;
+  height: 28rpx;
+  flex-shrink: 0;
 }
 .vehicles-text {
   font-size: 24rpx;
@@ -212,6 +276,16 @@
 .price-val {
   font-size: 30rpx;
   color: #111827;
+}
+.order-timing-tip {
+  margin: 0 0 22rpx;
+  padding: 14rpx 18rpx;
+  border-radius: 8rpx;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 22rpx;
+  line-height: 1.45;
+  word-break: break-all;
 }
 
 /* Card Actions button block */

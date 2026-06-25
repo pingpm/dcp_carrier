@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "确认交车",
   "usingComponents": {
-    "carrier-image-uploader": "../../components/carrier-image-uploader/carrier-image-uploader"
+    "carrier-image-uploader": "../../components/carrier-image-uploader/carrier-image-uploader",
+    "miniapp-login-sheet": "../../components/miniapp-login-sheet/miniapp-login-sheet"
   }
 }

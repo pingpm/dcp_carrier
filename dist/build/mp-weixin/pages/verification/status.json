@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "认证状态",
-  "usingComponents": {}
+  "usingComponents": {
+    "miniapp-login-sheet": "../../components/miniapp-login-sheet/miniapp-login-sheet"
+  }
 }

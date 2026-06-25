@@ -1,5 +1,14 @@
 <template>
   <view class="page recharge-records-page">
+    <view class="mode-tabs section">
+      <view class="mode-tab" :class="{ active: recordMode === 'online' }" @click="switchMode('online')">
+        在线充值
+      </view>
+      <view class="mode-tab" :class="{ active: recordMode === 'offline' }" @click="switchMode('offline')">
+        对公转账
+      </view>
+    </view>
+
     <!-- Filter tabs -->
     <view class="segmented-control section" style="margin-bottom: 20rpx">
       <view class="segment-item" :class="{ active: activeType === '' }" @click="switchType('')">
@@ -24,7 +33,7 @@
     <!-- List View -->
     <view class="empty" v-if="records.length === 0"> 暂无符合条件的充值记录 </view>
     <view v-else class="records-list">
-      <view class="section record-card" v-for="item in records" :key="item.id">
+      <view v-if="recordMode === 'online'" class="section record-card" v-for="item in records" :key="item.id">
         <view class="row-between card-header">
           <view class="row align-center">
             <text class="record-type-badge" :class="item.walletType.toLowerCase()">
@@ -45,14 +54,48 @@
           支付时间: {{ dateText(item.paidAt) }}
         </view>
       </view>
+
+      <view v-if="recordMode === 'offline'" class="section record-card" v-for="item in records" :key="item.id">
+        <view class="row-between card-header">
+          <view class="row align-center">
+            <text class="record-type-badge" :class="item.walletType.toLowerCase()">
+              {{ walletTypeText[item.walletType] }}
+            </text>
+            <text class="order-no-font">记录号: {{ item.recordNo }}</text>
+          </view>
+          <text class="status-tag" :class="offlineStatusClass(item.reviewStatus)">
+            {{ offlineRechargeStatusText[item.reviewStatus] || item.reviewStatus }}
+          </text>
+        </view>
+
+        <view class="record-meta-row row-between align-center">
+          <text class="record-time">提交时间: {{ dateText(item.submittedAt) }}</text>
+          <text v-if="item.approvedAmountCent" class="record-amt font-bold">
+            + {{ yuanText(item.approvedAmountCent) }}
+          </text>
+        </view>
+        <view class="offline-proof-row" v-if="item.proofFile && item.proofFile.fileUrl">
+          <image class="proof-thumb" :src="item.proofFile.fileUrl" mode="aspectFill" @click="previewProof(item)" />
+          <view class="offline-proof-copy">
+            <text>转账凭证</text>
+            <text v-if="item.reviewedAt">审核时间: {{ dateText(item.reviewedAt) }}</text>
+            <text v-if="item.transferSerialNo">转账流水号: {{ item.transferSerialNo }}</text>
+            <text v-if="item.reviewRemark">审核备注: {{ item.reviewRemark }}</text>
+            <text v-if="item.rejectReason" class="reject-reason">驳回原因: {{ item.rejectReason }}</text>
+          </view>
+        </view>
+      </view>
     </view>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
+import { miniappLoginPageMixin } from '../../utils/miniapp-login-page.js';
 import { api, requireLogin } from '../../utils/api.js';
 import {
   dateText,
+  offlineRechargeStatusText,
   paymentStatusText,
   walletTypeText,
   yuanText,
@@ -60,13 +103,19 @@ import {
 } from '../../utils/format.js';
 
 export default {
+  mixins: [miniappLoginPageMixin],
   data() {
     return {
       activeType: '', // '', DEPOSIT, INFO_FEE
+      recordMode: 'online',
       records: [],
+      offlineRechargeStatusText,
       paymentStatusText,
       walletTypeText,
     };
+  },
+  onLoad(options) {
+    if (options.mode === 'offline') this.recordMode = 'offline';
   },
   onShow() {
     if (requireLogin()) this.load();
@@ -75,11 +124,19 @@ export default {
     dateText,
     yuanText,
     statusClass,
+    offlineStatusClass(status) {
+      if (status === 'APPROVED') return 'status-success';
+      if (status === 'REJECTED') return 'status-danger';
+      return 'status-warning';
+    },
     async load() {
       try {
         const params = {};
         if (this.activeType) params.walletType = this.activeType;
-        const res = await api.rechargeRecords(params);
+        const res =
+          this.recordMode === 'offline'
+            ? await api.offlineRechargeRecords(params)
+            : await api.rechargeRecords(params);
         this.records = res.records || res.items || [];
       } catch (err) {
         console.error(err);
@@ -89,6 +146,15 @@ export default {
       this.activeType = type;
       this.load();
     },
+    switchMode(mode) {
+      this.recordMode = mode;
+      this.records = [];
+      this.load();
+    },
+    previewProof(item) {
+      const url = item?.proofFile?.fileUrl;
+      if (url) uni.previewImage({ urls: [url] });
+    },
   },
 };
 </script>
@@ -96,6 +162,31 @@ export default {
 <style>
 .recharge-records-page {
   padding: 24rpx;
+}
+
+.mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12rpx;
+  padding: 10rpx !important;
+  margin-bottom: 20rpx;
+  background: #eef6ff !important;
+}
+
+.mode-tab {
+  text-align: center;
+  height: 68rpx;
+  line-height: 68rpx;
+  border-radius: 10rpx;
+  color: #475569;
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.mode-tab.active {
+  background: #ffffff;
+  color: #1677ff;
+  box-shadow: 0 4rpx 12rpx rgba(17, 24, 39, 0.05);
 }
 
 /* Segmented Control */
@@ -180,5 +271,35 @@ export default {
   margin-top: 10rpx;
   border-top: 1rpx dashed #f3f4f6;
   padding-top: 10rpx;
+}
+
+.offline-proof-row {
+  display: flex;
+  gap: 18rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx dashed #f3f4f6;
+}
+
+.proof-thumb {
+  width: 132rpx;
+  height: 132rpx;
+  border-radius: 12rpx;
+  background: #e5e7eb;
+  flex-shrink: 0;
+}
+
+.offline-proof-copy {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  color: #64748b;
+  font-size: 22rpx;
+  line-height: 1.4;
+}
+
+.reject-reason {
+  color: #dc2626;
 }
 </style>

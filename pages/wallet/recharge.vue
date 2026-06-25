@@ -65,7 +65,7 @@
             <view class="offline-icon">公</view>
             <view class="method-copy">
               <text class="method-lbl">对公转账</text>
-              <text class="method-desc">转账后联系客服，由后台调账入账</text>
+              <text class="method-desc">转账后上传凭证，后台审核后入账</text>
             </view>
           </view>
           <view v-if="payMethod === 'OFFLINE'" class="method-selected-badge offline-badge">
@@ -104,32 +104,32 @@
     <view v-if="payMethod === 'OFFLINE'" class="section offline-account-section">
       <view class="section-title">对公转账信息</view>
       <view class="offline-tip">
-        <text>请通过企业账户转账至以下对公账户，转账后联系客服，由后台核实后为您的{{ walletTypeLabel }}账户调账入账。</text>
+        <text>请通过企业账户转账至以下对公账户，转账完成后上传凭证。后台财务审核并填写入账金额后，会增加您的{{ walletTypeLabel }}账户余额。</text>
       </view>
 
       <view class="account-row">
         <text class="account-label">户名</text>
-        <text class="account-value">{{ offlineAccount.accountName || '-' }}</text>
+        <text class="account-value" selectable>{{ offlineAccount.accountName || '-' }}</text>
         <button class="copy-btn" @click="copyText(offlineAccount.accountName)">复制</button>
       </view>
       <view class="account-row">
         <text class="account-label">开户行</text>
-        <text class="account-value">{{ offlineAccount.bankName || '-' }}</text>
+        <text class="account-value" selectable>{{ offlineAccount.bankName || '-' }}</text>
         <button class="copy-btn" @click="copyText(offlineAccount.bankName)">复制</button>
       </view>
       <view v-if="offlineAccount.bankBranch" class="account-row">
         <text class="account-label">开户支行</text>
-        <text class="account-value">{{ offlineAccount.bankBranch }}</text>
+        <text class="account-value" selectable>{{ offlineAccount.bankBranch }}</text>
         <button class="copy-btn" @click="copyText(offlineAccount.bankBranch)">复制</button>
       </view>
       <view class="account-row">
         <text class="account-label">账号</text>
-        <text class="account-value mono">{{ offlineAccount.accountNo || '-' }}</text>
+        <text class="account-value mono" selectable>{{ offlineAccount.accountNo || '-' }}</text>
         <button class="copy-btn" @click="copyText(offlineAccount.accountNo)">复制</button>
       </view>
       <view class="account-row">
         <text class="account-label">客服</text>
-        <text class="account-value">{{ offlineAccount.contact || '-' }}</text>
+        <text class="account-value" selectable>{{ offlineAccount.contact || '-' }}</text>
         <button class="copy-btn" @click="copyText(offlineAccount.contact)">复制</button>
       </view>
 
@@ -138,42 +138,45 @@
           <text class="remark-label">转账备注信息</text>
           <button class="copy-remark-btn" @click="copyText(transferInfoText)">复制全部</button>
         </view>
-        <text v-if="offlineAccount.transferRemark" class="remark-text">
+        <text v-if="offlineAccount.transferRemark" class="remark-text" selectable>
           {{ offlineAccount.transferRemark }}
         </text>
         <view class="remark-info-list">
           <view class="remark-info-row">
             <text class="remark-info-label">企业名称</text>
-            <text class="remark-info-value">{{ transferCompanyName }}</text>
+            <text class="remark-info-value" selectable>{{ transferCompanyName }}</text>
             <button class="copy-btn compact-copy-btn" @click="copyText(transferCompanyName)">复制</button>
           </view>
           <view class="remark-info-row">
             <text class="remark-info-label">注册手机号</text>
-            <text class="remark-info-value mono">{{ transferRegisteredPhone }}</text>
+            <text class="remark-info-value mono" selectable>{{ transferRegisteredPhone }}</text>
             <button class="copy-btn compact-copy-btn" @click="copyText(transferRegisteredPhone)">复制</button>
           </view>
           <view class="remark-info-row">
             <text class="remark-info-label">充值类型</text>
-            <text class="remark-info-value">{{ walletTypeLabel }}账户</text>
+            <text class="remark-info-value" selectable>{{ walletTypeLabel }}账户</text>
             <button class="copy-btn compact-copy-btn" @click="copyText(`${walletTypeLabel}账户`)">复制</button>
           </view>
         </view>
       </view>
+
     </view>
 
     <view v-if="!currentMethods.wechatEnabled && !currentMethods.offlineEnabled" class="section unavailable-section">
       <text>当前账户暂未开放充值方式，请联系平台客服。</text>
     </view>
 
-    <view v-if="payMethod === 'WECHAT'" class="fixed-footer">
+    <view v-if="payMethod" class="fixed-footer">
       <button class="primary-btn animate-btn w-full" :loading="submitting" @click="submit">
-        微信支付充值
+        {{ payMethod === 'WECHAT' ? '微信支付充值' : '已完成转账？上传凭证' }}
       </button>
     </view>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
+import { miniappLoginPageMixin } from '../../utils/miniapp-login-page.js';
 import { api, requestWechatPayment, requireLogin } from '../../utils/api.js';
 import { yuanToCent } from '../../utils/format.js';
 
@@ -193,6 +196,7 @@ const defaultRechargeConfig = {
 };
 
 export default {
+  mixins: [miniappLoginPageMixin],
   data() {
     return {
       presets: [100, 500, 1000, 2000, 5000],
@@ -297,14 +301,19 @@ export default {
       this.amountYuan = String(amt);
     },
     copyText(text) {
-      if (!text) {
+      const content = String(text || '').trim();
+      if (!content) {
         uni.showToast({ title: '暂无可复制内容', icon: 'none' });
         return;
       }
       uni.setClipboardData({
-        data: text,
+        data: content,
         success: () => {
           uni.showToast({ title: '已复制', icon: 'none' });
+        },
+        fail: (err) => {
+          console.error('copy clipboard failed', err);
+          uni.showToast({ title: '复制失败，请长按文字复制', icon: 'none' });
         },
       });
     },
@@ -318,7 +327,18 @@ export default {
       this.form.amountCent = cent;
       return true;
     },
+    goOfflineProof() {
+      if (!this.currentMethods.offlineEnabled) {
+        uni.showToast({ title: '当前账户未开启对公转账', icon: 'none' });
+        return;
+      }
+      uni.navigateTo({ url: `/pages/wallet/offline-recharge-proof?type=${this.form.walletType}` });
+    },
     async submit() {
+      if (this.payMethod === 'OFFLINE') {
+        this.goOfflineProof();
+        return;
+      }
       if (!this.currentMethods.wechatEnabled) {
         uni.showToast({ title: '当前账户未开启微信支付', icon: 'none' });
         return;

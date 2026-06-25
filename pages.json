@@ -43,12 +43,6 @@
       }
     },
     {
-      "path": "pages/order/contract",
-      "style": {
-        "navigationBarTitleText": "确认合同"
-      }
-    },
-    {
       "path": "pages/order/driver-form",
       "style": {
         "navigationBarTitleText": "设置司机"
@@ -118,6 +112,12 @@
       "path": "pages/wallet/recharge",
       "style": {
         "navigationBarTitleText": "钱包充值"
+      }
+    },
+    {
+      "path": "pages/wallet/offline-recharge-proof",
+      "style": {
+        "navigationBarTitleText": "提交充值凭证"
       }
     },
     {

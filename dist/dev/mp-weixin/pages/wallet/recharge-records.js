@@ -24,7 +24,7 @@ const _sfc_main = {
         if (this.activeType)
           params.walletType = this.activeType;
         const res = await common_vendor.api.rechargeRecords(params);
-        this.records = res.items || [];
+        this.records = res.records || res.items || [];
       } catch (err) {
         console.error(err);
       }

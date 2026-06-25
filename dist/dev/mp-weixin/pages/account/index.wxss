@@ -26,15 +26,24 @@
 }
 .profile-meta {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 8rpx;
+}
+.profile-name-row {
+  min-width: 0;
 }
 .nickname {
   font-size: 36rpx;
   font-weight: 800;
   color: #ffffff;
   line-height: 1.2;
+  min-width: 0;
+  max-width: 360rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .verify-badge {
   display: inline-flex;
@@ -67,8 +76,9 @@
   color: rgba(255, 255, 255, 0.7);
 }
 .header-arrow {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 28rpx;
+  width: 30rpx;
+  height: 30rpx;
+  opacity: 0.75;
   flex-shrink: 0;
 }
 
@@ -97,6 +107,15 @@
   align-items: center;
   margin-bottom: 24rpx;
 }
+.wallet-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.wallet-title-icon {
+  width: 34rpx;
+  height: 34rpx;
+}
 .wallet-title {
   font-size: 28rpx;
   font-weight: 700;
@@ -113,8 +132,8 @@
   font-weight: 600;
 }
 .wallet-link-arrow {
-  font-size: 20rpx;
-  color: #1677ff;
+  width: 24rpx;
+  height: 24rpx;
 }
 .wallet-balance-row {
   display: flex;
@@ -150,9 +169,17 @@
   flex-shrink: 0;
 }
 .wallet-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
   margin-top: 20rpx;
   padding-top: 16rpx;
   border-top: 1rpx solid #f3f4f6;
+}
+.wallet-status-icon {
+  width: 28rpx;
+  height: 28rpx;
+  flex-shrink: 0;
 }
 .wallet-status-warn {
   font-size: 22rpx;
@@ -172,7 +199,8 @@
   border: 1rpx solid #fde68a;
 }
 .cert-icon {
-  font-size: 36rpx;
+  width: 38rpx;
+  height: 38rpx;
   flex-shrink: 0;
 }
 .cert-text-wrap {
@@ -191,8 +219,8 @@
   color: #a16207;
 }
 .cert-arrow {
-  color: #d97706;
-  font-size: 24rpx;
+  width: 28rpx;
+  height: 28rpx;
   flex-shrink: 0;
 }
 
@@ -224,7 +252,8 @@
   border-bottom: none;
 }
 .cell-icon {
-  font-size: 36rpx;
+  width: 38rpx;
+  height: 38rpx;
   margin-right: 20rpx;
   flex-shrink: 0;
 }
@@ -258,8 +287,8 @@
   color: #dc2626;
 }
 .cell-arrow {
-  color: #d1d5db;
-  font-size: 24rpx;
+  width: 28rpx;
+  height: 28rpx;
 }
 
 /* ---- Logout ---- */

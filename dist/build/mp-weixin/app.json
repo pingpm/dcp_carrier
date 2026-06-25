@@ -7,7 +7,6 @@
     "pages/verification/form",
     "pages/order/list",
     "pages/order/detail",
-    "pages/order/contract",
     "pages/order/driver-form",
     "pages/order/pickup",
     "pages/order/transit-location",
@@ -20,6 +19,7 @@
     "pages/route/tier-template",
     "pages/wallet/index",
     "pages/wallet/recharge",
+    "pages/wallet/offline-recharge-proof",
     "pages/wallet/recharge-records",
     "pages/wallet/info-fee-deductions",
     "pages/wallet/transactions",
@@ -58,6 +58,11 @@
         "selectedIconPath": "static/carrier._tabbar_my_selected.png"
       }
     ]
+  },
+  "permission": {
+    "scope.writeClipboard": {
+      "desc": "用于复制对公转账账户和转账备注信息"
+    }
   },
   "usingComponents": {}
 }

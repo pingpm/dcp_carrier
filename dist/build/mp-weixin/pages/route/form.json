@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "编辑线路",
   "usingComponents": {
-    "region-select-field": "../../components/region-select-field/region-select-field"
+    "region-select-field": "../../components/region-select-field/region-select-field",
+    "miniapp-login-sheet": "../../components/miniapp-login-sheet/miniapp-login-sheet"
   }
 }

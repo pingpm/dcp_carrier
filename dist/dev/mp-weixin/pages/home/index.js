@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   data() {
     return {
@@ -38,14 +39,35 @@ const _sfc_main = {
     routeCounts() {
       return this.dashboard.routeCounts || {};
     },
+    isVerificationApproved() {
+      return this.dashboard.reviewStatus === "APPROVED";
+    },
     isDepositBelowMinimum() {
-      return this.wallet.depositBalanceCent < this.wallet.depositMinimumCent;
+      return this.isVerificationApproved && Boolean(this.wallet.isDepositBelowMinimum);
     },
     isInfoFeeInsufficient() {
-      return this.wallet.infoFeeBalanceCent <= 0;
+      return this.isVerificationApproved && Boolean(this.wallet.isInfoFeeInsufficient);
     },
     hasWalletRisk() {
       return this.isDepositBelowMinimum || this.isInfoFeeInsufficient;
+    },
+    depositStatusText() {
+      if (!this.isVerificationApproved) {
+        return "认证通过后校验保证金标准";
+      }
+      if (this.wallet.isDepositCheckEnabled === false) {
+        return "当前状态: 搜索联系限制已关闭";
+      }
+      return `最低标准: ${this.yuanText(this.wallet.depositMinimumCent)}`;
+    },
+    infoFeeStatusText() {
+      if (!this.isVerificationApproved) {
+        return "当前状态: 认证通过后校验";
+      }
+      if (this.wallet.isInfoFeeCheckEnabled === false) {
+        return "当前状态: 搜索联系限制已关闭";
+      }
+      return `当前状态: ${this.isInfoFeeInsufficient ? "不足" : "充足"}`;
     },
     walletRiskText() {
       if (this.isDepositBelowMinimum && this.isInfoFeeInsufficient) {
@@ -95,11 +117,11 @@ const _sfc_main = {
     },
     async loadData() {
       try {
-        const res = await common_vendor.api.dashboard();
+        const res = await common_vendor.api.dashboard({ silent: true, authRedirect: false });
         this.dashboard = res;
         this.showVerificationPromptIfNeeded(res.reviewStatus);
       } catch (error) {
-        console.error(error);
+        this.resetData();
       }
     },
     showVerificationPromptIfNeeded(reviewStatus) {
@@ -115,7 +137,10 @@ const _sfc_main = {
         cancelText: "稍后认证",
         success: (res) => {
           if (res.confirm) {
-            common_vendor.index.navigateTo({ url: "/pages/verification/status" });
+            if (typeof common_vendor.index.hideModal === "function") {
+              common_vendor.index.hideModal();
+            }
+            this.goVerification();
           }
         }
       });
@@ -125,7 +150,8 @@ const _sfc_main = {
         this.goLogin();
         return;
       }
-      common_vendor.index.navigateTo({ url: "/pages/verification/status" });
+      const url = this.dashboard.reviewStatus === "PENDING" ? "/pages/verification/status" : "/pages/verification/form";
+      common_vendor.index.navigateTo({ url });
     },
     goOrders(status) {
       if (!this.isLoggedIn) {
@@ -158,40 +184,48 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
     a: !$data.isLoggedIn
   }, !$data.isLoggedIn ? {
-    b: common_vendor.o((...args) => $options.goLogin && $options.goLogin(...args), "63")
+    b: common_assets._imports_0,
+    c: common_assets._imports_1,
+    d: common_vendor.o((...args) => $options.goLogin && $options.goLogin(...args), "63")
   } : $data.dashboard.reviewStatus !== "APPROVED" ? {
-    d: common_vendor.o((...args) => $options.goVerification && $options.goVerification(...args), "85")
+    f: common_assets._imports_3,
+    g: common_assets._imports_1,
+    h: common_vendor.o((...args) => $options.goVerification && $options.goVerification(...args), "06")
   } : {}, {
-    c: $data.dashboard.reviewStatus !== "APPROVED",
-    e: $data.isLoggedIn && $options.hasWalletRisk
+    e: $data.dashboard.reviewStatus !== "APPROVED",
+    i: $data.isLoggedIn && $options.hasWalletRisk
   }, $data.isLoggedIn && $options.hasWalletRisk ? {
-    f: common_vendor.t($options.walletRiskText),
-    g: common_vendor.o((...args) => $options.goWallet && $options.goWallet(...args), "1b")
+    j: common_assets._imports_3,
+    k: common_vendor.t($options.walletRiskText),
+    l: common_assets._imports_1,
+    m: common_vendor.o((...args) => $options.goWallet && $options.goWallet(...args), "43")
   } : {}, {
-    h: common_vendor.t($options.todoCounts.pendingConfirm || 0),
-    i: $options.todoCounts.pendingConfirm > 0 ? 1 : "",
-    j: common_vendor.o(($event) => $options.goOrders("PENDING_CONFIRM"), "c8"),
-    k: common_vendor.t($options.todoCounts.pendingContract || 0),
-    l: $options.todoCounts.pendingContract > 0 ? 1 : "",
-    m: common_vendor.o(($event) => $options.goOrders("PENDING_CONTRACT"), "19"),
-    n: common_vendor.t($options.todoCounts.pendingPickup || 0),
-    o: $options.todoCounts.pendingPickup > 0 ? 1 : "",
-    p: common_vendor.o(($event) => $options.goOrders("PENDING_PICKUP"), "56"),
-    q: common_vendor.t($options.todoCounts.inTransit || 0),
-    r: common_vendor.o(($event) => $options.goOrders("IN_TRANSIT"), "16"),
-    s: common_vendor.t($options.todoCounts.cancelPending || 0),
-    t: $options.todoCounts.cancelPending > 0 ? 1 : "",
-    v: common_vendor.o(($event) => $options.goOrders("CANCEL_PENDING"), "42"),
-    w: common_vendor.t($options.yuanText($options.wallet.depositBalanceCent)),
-    x: $options.isDepositBelowMinimum ? 1 : "",
-    y: common_vendor.t($options.yuanText($options.wallet.depositMinimumCent)),
-    z: common_vendor.t($options.yuanText($options.wallet.infoFeeBalanceCent)),
-    A: $options.isInfoFeeInsufficient ? 1 : "",
-    B: common_vendor.t($options.isInfoFeeInsufficient ? "不足" : "充足"),
-    C: common_vendor.o((...args) => $options.goWallet && $options.goWallet(...args), "66"),
-    D: common_vendor.t($options.routeCounts.largeTruck || 0),
-    E: common_vendor.t($options.routeCounts.smallTruck || 0),
-    F: common_vendor.o((...args) => $options.goRoutes && $options.goRoutes(...args), "4e")
+    n: common_vendor.t($options.todoCounts.pendingConfirm || 0),
+    o: $options.todoCounts.pendingConfirm > 0 ? 1 : "",
+    p: common_vendor.o(($event) => $options.goOrders("PENDING_CONFIRM"), "57"),
+    q: common_vendor.t($options.todoCounts.pendingContract || 0),
+    r: $options.todoCounts.pendingContract > 0 ? 1 : "",
+    s: common_vendor.o(($event) => $options.goOrders("PENDING_CONTRACT"), "40"),
+    t: common_vendor.t($options.todoCounts.pendingPickup || 0),
+    v: $options.todoCounts.pendingPickup > 0 ? 1 : "",
+    w: common_vendor.o(($event) => $options.goOrders("PENDING_PICKUP"), "55"),
+    x: common_vendor.t($options.todoCounts.inTransit || 0),
+    y: common_vendor.o(($event) => $options.goOrders("IN_TRANSIT"), "75"),
+    z: common_vendor.t($options.todoCounts.cancelPending || 0),
+    A: $options.todoCounts.cancelPending > 0 ? 1 : "",
+    B: common_vendor.o(($event) => $options.goOrders("CANCEL_PENDING"), "48"),
+    C: common_assets._imports_1,
+    D: common_vendor.t($options.yuanText($options.wallet.depositBalanceCent)),
+    E: $options.isDepositBelowMinimum ? 1 : "",
+    F: common_vendor.t($options.depositStatusText),
+    G: common_vendor.t($options.yuanText($options.wallet.infoFeeBalanceCent)),
+    H: $options.isInfoFeeInsufficient ? 1 : "",
+    I: common_vendor.t($options.infoFeeStatusText),
+    J: common_vendor.o((...args) => $options.goWallet && $options.goWallet(...args), "b0"),
+    K: common_assets._imports_1,
+    L: common_vendor.t($options.routeCounts.largeTruck || 0),
+    M: common_vendor.t($options.routeCounts.smallTruck || 0),
+    N: common_vendor.o((...args) => $options.goRoutes && $options.goRoutes(...args), "ee")
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

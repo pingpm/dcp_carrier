@@ -21,6 +21,33 @@
   margin-left: 6rpx;
   font-weight: bold;
 }
+.transit-address-display {
+  min-height: 92rpx;
+  align-items: flex-start;
+  padding-top: 18rpx;
+  padding-bottom: 18rpx;
+}
+.transit-address-display.disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+.address-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  width: 100%;
+}
+.address-summary-name {
+  color: #111827;
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.address-summary-detail {
+  color: #6b7280;
+  font-size: 23rpx;
+  line-height: 1.45;
+}
 .dev-location-btn {
   margin-top: 20rpx;
   width: 100%;

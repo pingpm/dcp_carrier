@@ -87,8 +87,8 @@ const _sfc_main = {
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
     a: $data.newTemplateName,
-    b: common_vendor.o(($event) => $data.newTemplateName = $event.detail.value, "f9"),
-    c: common_vendor.o((...args) => $options.addTierItem && $options.addTierItem(...args), "d1"),
+    b: common_vendor.o(($event) => $data.newTemplateName = $event.detail.value, "c1"),
+    c: common_vendor.o((...args) => $options.addTierItem && $options.addTierItem(...args), "41"),
     d: common_vendor.f($data.newItems, (item, index, i0) => {
       return {
         a: item.startKm,
@@ -102,7 +102,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
       };
     }),
     e: $data.submitting,
-    f: common_vendor.o((...args) => $options.createTemplate && $options.createTemplate(...args), "81"),
+    f: common_vendor.o((...args) => $options.createTemplate && $options.createTemplate(...args), "33"),
     g: common_vendor.t($data.templates.length),
     h: $data.templates.length === 0
   }, $data.templates.length === 0 ? {} : {

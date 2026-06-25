@@ -63,6 +63,20 @@
             order.hasInvoice ? '需要发票（线下交付）' : '不需要发票'
           }}</text>
         </view>
+        <view class="detail-row">
+          <text class="detail-label">保险</text>
+          <text class="detail-value">
+            {{
+              order.hasInsurance
+                ? `含保险，最高保额${yuanText(order.insuranceMaxAmountCent)}`
+                : '不含保险'
+            }}
+          </text>
+        </view>
+        <view class="detail-row" v-if="order.hasInsurance && order.insuranceRemark">
+          <text class="detail-label">保险备注</text>
+          <text class="detail-value">{{ order.insuranceRemark }}</text>
+        </view>
       </view>
     </view>
 
@@ -375,13 +389,16 @@
         </view>
       </view>
     </view>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
+import { miniappLoginPageMixin } from '../../utils/miniapp-login-page.js';
 import { api, requireLogin } from '../../utils/api.js';
 import {
   dateText,
+  formatOrderLogAction,
   orderStatusText,
   statusClass,
   transportModeText,
@@ -390,6 +407,7 @@ import {
 } from '../../utils/format.js';
 
 export default {
+  mixins: [miniappLoginPageMixin],
   data() {
     return {
       orderId: '',
@@ -410,9 +428,7 @@ export default {
       const status = this.order.orderStatus;
       if (status === 'COMPLETED') return 'completed';
       if (
-        ['PENDING_CONFIRM', 'PENDING_CONTRACT', 'PENDING_RECEIPT', 'CANCEL_PENDING'].includes(
-          status,
-        )
+        ['PENDING_CONFIRM', 'PENDING_RECEIPT', 'CANCEL_PENDING'].includes(status)
       )
         return 'warning';
       if (['PENDING_PICKUP', 'IN_TRANSIT'].includes(status)) return 'in-transit';
@@ -422,7 +438,6 @@ export default {
       const status = this.order.orderStatus;
       if (status === 'COMPLETED') return '/static/icons/check-circle.svg';
       if (status === 'PENDING_CONFIRM') return '/static/icons/clock.svg';
-      if (status === 'PENDING_CONTRACT') return '/static/icons/file-text.svg';
       if (status === 'PENDING_RECEIPT') return '/static/icons/package.svg';
       if (status === 'CANCEL_PENDING') return '/static/icons/alert-triangle.svg';
       if (status === 'IN_TRANSIT') return '/static/icons/truck.svg';
@@ -433,7 +448,6 @@ export default {
       const status = this.order.orderStatus;
       const map = {
         PENDING_CONFIRM: this.action('confirm', '确认接单', 'primary-btn', this.confirmOrder),
-        PENDING_CONTRACT: this.action('contract', '确认合同', 'primary-btn', this.goContract),
         PENDING_PICKUP: this.action('pickup', '确认提车', 'primary-btn', this.goPickup),
         IN_TRANSIT: this.action('handover', '确认交车', 'primary-btn', this.goHandover),
         CANCEL_PENDING: this.action('cancelHandle', '处理取消', 'primary-btn', this.goCancelHandle),
@@ -456,13 +470,13 @@ export default {
     moreFooterActions() {
       const status = this.order.orderStatus;
       const actions = [];
-      if (['PENDING_CONTRACT', 'PENDING_PICKUP', 'IN_TRANSIT', 'CANCEL_PENDING'].includes(status)) {
+      if (['PENDING_PICKUP', 'IN_TRANSIT', 'CANCEL_PENDING'].includes(status)) {
         actions.push(this.action('contact', '联系车商客户', 'plain-btn', this.contactDealerDirect));
       }
       if (status === 'PENDING_CONFIRM') {
         actions.push(this.action('directCancel', '拒绝 / 取消订单', 'danger-btn', this.cancelOrderDirect, true));
       }
-      if (['PENDING_CONTRACT', 'PENDING_PICKUP', 'IN_TRANSIT'].includes(status)) {
+      if (['PENDING_PICKUP', 'IN_TRANSIT'].includes(status)) {
         actions.push(this.action('cancel', '发起取消协商', 'danger-btn', this.goCancel, true));
       }
       if (status === 'IN_TRANSIT') {
@@ -639,9 +653,6 @@ export default {
     cancelOrderDirect() {
       uni.navigateTo({ url: `/pages/order/cancel-request?orderId=${this.orderId}&direct=1` });
     },
-    goContract() {
-      uni.navigateTo({ url: `/pages/order/contract?orderId=${this.orderId}` });
-    },
     setDriver(driverType = 'PICKUP') {
       uni.navigateTo({
         url: `/pages/order/driver-form?orderId=${this.orderId}&driverType=${driverType}`,
@@ -782,38 +793,7 @@ export default {
       return 'status-warning';
     },
     logActionText(actionType) {
-      if (!actionType) return '';
-      const key = String(actionType).toUpperCase();
-      const map = {
-        CREATE: '订单提交创建',
-        CREATE_ORDER: '订单提交创建',
-        UPDATE_ORDER: '车商修改订单',
-        GUARANTEE_PAID: '车商已支付担保费',
-        CARRIER_CONFIRM: '承运商确认接单',
-        CONFIRM_CONTRACT: '双方确认合同',
-        CONTRACT_SIGN: '双方确认合同',
-        SET_DRIVER: '设置司机信息',
-        PICKUP: '提车验车完成',
-        PICKUP_CONFIRM: '提车验车完成',
-        TRANSIT_LOCATION: '位置上报',
-        TRANSIT_REPORT: '位置上报',
-        HANDOVER: '交车确认完成',
-        HANDOVER_CONFIRM: '交车确认完成',
-        RECEIPT_CONFIRM: '车商收车结算',
-        DEALER_CONFIRM_RECEIPT: '车商收车结算',
-        AUTO_RECEIPT: '系统自动确认收车',
-        DIRECT_CANCEL: '订单取消关闭',
-        CANCEL_REQUEST: '发起取消申请',
-        CANCEL_WITHDRAW: '撤回取消申请',
-        WITHDRAW: '撤回取消申请',
-        CANCEL_HANDLE: '取消申请已处理',
-        CANCEL_APPROVED: '同意取消申请',
-        CANCEL_REJECTED: '拒绝取消申请',
-        FORCE_CANCEL: '系统强制取消',
-        ADMIN_FORCE_CANCEL: '系统强制取消',
-        STATUS_CHANGE: '订单状态变更',
-      };
-      return map[key] || actionType;
+      return formatOrderLogAction(actionType);
     },
   },
 };

@@ -1,53 +1,78 @@
 .status-page {
   padding: 30rpx;
   padding-bottom: calc(150rpx + env(safe-area-inset-bottom));
+  background: #f1f6fc;
 }
 .status-banner-card {
   display: flex;
-  align-items: center;
-  gap: 28rpx;
-  padding: 48rpx 36rpx;
-  border-radius: var(--radius-lg);
-  margin-bottom: 28rpx;
-  border: 1rpx solid rgba(229, 231, 235, 0.5);
-  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.02);
+  align-items: flex-start;
+  gap: 24rpx;
+  min-height: 146rpx;
+  padding: 30rpx 32rpx;
+  border-radius: 18rpx;
+  margin-bottom: 24rpx;
+  border: 1rpx solid rgba(229, 231, 235, 0.75);
+  box-shadow: 0 12rpx 28rpx rgba(15, 23, 42, 0.04);
   background: #ffffff;
 }
 .status-icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 90rpx;
-  height: 90rpx;
+  width: 72rpx;
+  height: 72rpx;
   border-radius: 50%;
-  font-size: 44rpx;
   flex-shrink: 0;
-  font-weight: bold;
+  margin-top: 4rpx;
+}
+.status-icon-image {
+  width: 72rpx;
+  height: 72rpx;
 }
 .status-banner-meta {
   display: flex;
   flex-direction: column;
-  gap: 8rpx;
+  gap: 10rpx;
+  min-width: 0;
 }
 .status-title-text {
-  font-size: 34rpx;
+  font-size: 36rpx;
   font-weight: 800;
   color: #111827;
+  line-height: 1.2;
 }
 .status-subtitle-text {
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: #6b7280;
-  line-height: 1.4;
+  line-height: 1.45;
+}
+.inline-reject-reason {
+  margin-top: 14rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 12rpx;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1rpx solid #fee2e2;
+}
+.inline-reject-label {
+  display: block;
+  margin-bottom: 6rpx;
+  color: #dc2626;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+.inline-reject-text {
+  display: block;
+  color: #374151;
+  font-size: 26rpx;
+  line-height: 1.45;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 /* Status variants */
 .status-banner-card.approved {
   background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
   border-color: #bbf7d0;
-}
-.status-banner-card.approved .status-icon-wrap {
-  background: #eaf7ee;
-  color: #16a34a;
 }
 .status-banner-card.approved .status-title-text {
   color: #16a34a;
@@ -56,20 +81,12 @@
   background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
   border-color: #bfdbfe;
 }
-.status-banner-card.pending .status-icon-wrap {
-  background: #eff6ff;
-  color: #1677ff;
-}
 .status-banner-card.pending .status-title-text {
   color: #1677ff;
 }
 .status-banner-card.rejected {
   background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
   border-color: #fecaca;
-}
-.status-banner-card.rejected .status-icon-wrap {
-  background: #feecec;
-  color: #dc2626;
 }
 .status-banner-card.rejected .status-title-text {
   color: #dc2626;
@@ -82,21 +99,6 @@
   background: #e2e8f0;
   color: #64748b;
 }
-.reject-reason-card {
-  border-left: 8rpx solid var(--danger-color);
-  background: #fff8f8;
-}
-.reject-title {
-  color: var(--danger-color);
-  font-size: 28rpx;
-  font-weight: 700;
-  margin-bottom: 8rpx;
-}
-.reject-body {
-  color: #4b5563;
-  font-size: 26rpx;
-  line-height: 1.5;
-}
 .info-card {
   padding-bottom: 12rpx;
 }
@@ -108,19 +110,66 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 24rpx;
   padding: 24rpx 0;
   border-bottom: 1rpx solid #f1f5f9;
   font-size: 26rpx;
+}
+.column-row {
+  align-items: flex-start;
 }
 .info-row-item:last-child {
   border-bottom: 0;
 }
 .row-label {
+  flex-shrink: 0;
   color: var(--text-muted);
 }
 .row-value {
+  min-width: 0;
   color: var(--text-main);
   font-weight: 700;
+  text-align: right;
+  word-break: break-all;
+}
+.multiline-value {
+  line-height: 1.5;
+  white-space: normal;
+}
+.file-group {
+  margin-top: 28rpx;
+  padding-top: 28rpx;
+  border-top: 1rpx solid #f1f5f9;
+}
+.file-group-title {
+  margin-bottom: 18rpx;
+  color: var(--text-main);
+  font-size: 26rpx;
+  font-weight: 700;
+}
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16rpx;
+}
+.file-thumb,
+.file-item {
+  min-width: 0;
+}
+.file-image {
+  width: 100%;
+  height: 150rpx;
+  border-radius: 12rpx;
+  background: #f8fafc;
+  border: 1rpx solid #e5e7eb;
+}
+.file-label {
+  display: block;
+  margin-top: 8rpx;
+  color: var(--text-muted);
+  font-size: 20rpx;
+  line-height: 1.3;
+  text-align: center;
 }
 .guide-steps {
   display: flex;

@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   data() {
     return {
@@ -62,20 +63,21 @@ const _sfc_main = {
 };
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
-    a: common_vendor.t($data.profile.companyName || "企业名称未完善"),
-    b: $data.profile.reviewStatus === "APPROVED"
+    a: common_assets._imports_6,
+    b: common_vendor.t($data.profile.companyName || "企业名称未完善"),
+    c: $data.profile.reviewStatus === "APPROVED"
   }, $data.profile.reviewStatus === "APPROVED" ? {} : $data.profile.reviewStatus === "PENDING" ? {} : $data.profile.reviewStatus === "REJECTED" ? {} : {}, {
-    c: $data.profile.reviewStatus === "PENDING",
-    d: $data.profile.reviewStatus === "REJECTED",
-    e: common_vendor.t($data.profile.creditCode || "暂无"),
-    f: common_vendor.t($data.profile.legalRepresentativeName || "暂无"),
-    g: common_vendor.t($data.profile.registeredPhone || "暂无"),
-    h: common_vendor.t($data.profile.contactPhone || "暂无"),
-    i: common_vendor.o([($event) => $data.introduction = $event.detail.value, (...args) => $options.onInput && $options.onInput(...args)], "03"),
-    j: $data.introduction,
-    k: common_vendor.t($options.introductionLength),
-    l: $data.saving,
-    m: common_vendor.o((...args) => $options.saveProfile && $options.saveProfile(...args), "8c")
+    d: $data.profile.reviewStatus === "PENDING",
+    e: $data.profile.reviewStatus === "REJECTED",
+    f: common_vendor.t($data.profile.creditCode || "暂无"),
+    g: common_vendor.t($data.profile.legalRepresentativeName || "暂无"),
+    h: common_vendor.t($data.profile.registeredPhone || "暂无"),
+    i: common_vendor.t($data.profile.contactPhone || "暂无"),
+    j: common_vendor.o([($event) => $data.introduction = $event.detail.value, (...args) => $options.onInput && $options.onInput(...args)], "03"),
+    k: $data.introduction,
+    l: common_vendor.t($options.introductionLength),
+    m: $data.saving,
+    n: common_vendor.o((...args) => $options.saveProfile && $options.saveProfile(...args), "6d")
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

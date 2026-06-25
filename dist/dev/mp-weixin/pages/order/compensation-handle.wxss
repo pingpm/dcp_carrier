@@ -1,0 +1,46 @@
+.compensation-page.data-v-dc8b239a {
+  padding-bottom: 180rpx;
+}
+.claim-text.data-v-dc8b239a {
+  margin-top: 20rpx;
+  color: #475569;
+  line-height: 1.6;
+}
+.segmented.data-v-dc8b239a {
+  display: flex;
+  padding: 6rpx;
+  border-radius: 8rpx;
+  background: #eef2ff;
+  margin-bottom: 20rpx;
+}
+.segmented text.data-v-dc8b239a {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  border-radius: 6rpx;
+  color: #475569;
+}
+.segmented .active.data-v-dc8b239a {
+  background: #1677ff;
+  color: #fff;
+}
+.textarea.data-v-dc8b239a {
+  min-height: 200rpx;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 20rpx;
+  border-radius: 8rpx;
+  background: #f8fafc;
+}
+.remove-img.data-v-dc8b239a {
+  position: absolute;
+  right: -8rpx;
+  top: -8rpx;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 18rpx;
+  background: #ef4444;
+  color: #fff;
+  text-align: center;
+  line-height: 36rpx;
+}

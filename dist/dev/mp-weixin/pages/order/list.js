@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   data() {
     return {
@@ -46,10 +47,28 @@ const _sfc_main = {
     yuanVal(cent) {
       return (Number(cent || 0) / 100).toFixed(2) + " 元";
     },
+    orderTimingTip(order) {
+      if (order.orderStatus === "PENDING_CONFIRM" && order.carrierConfirmDeadlineAt) {
+        return `请在 ${this.dateText(order.carrierConfirmDeadlineAt)} 前确认接单`;
+      }
+      if (order.orderStatus === "PENDING_RECEIPT" && order.autoReceiptAt) {
+        return `车商未确认时，系统将在 ${this.dateText(order.autoReceiptAt)} 自动确认收车`;
+      }
+      return "";
+    },
     formatVehicles(vehicles) {
       if (!vehicles || !vehicles.length)
         return "";
       return vehicles.map((v) => `${v.brandName} ${v.modelName || ""}`).join("，");
+    },
+    formatServiceAddress(order, type) {
+      const prefix = type === "origin" ? "origin" : "destination";
+      return [
+        order[`${prefix}ProvinceName`],
+        order[`${prefix}CityName`],
+        order[`${prefix}DistrictName`],
+        order[`${prefix}AddressDetail`]
+      ].filter(Boolean).join("");
     },
     async load() {
       if (!this.isLoggedIn) {
@@ -58,10 +77,13 @@ const _sfc_main = {
       }
       this.loading = true;
       try {
-        const data = await common_vendor.api.orders({ orderStatus: this.activeStatus });
+        const data = await common_vendor.api.orders(
+          { orderStatus: this.activeStatus },
+          { silent: true, authRedirect: false }
+        );
         this.orders = data.orders || data.items || [];
       } catch (err) {
-        console.error(err);
+        this.orders = [];
       } finally {
         this.loading = false;
       }
@@ -97,34 +119,39 @@ const _sfc_main = {
       } catch (err) {
       }
     },
-    async confirmOrder(order) {
-      common_vendor.index.showModal({
-        title: "确认接单提示",
-        content: "确认承接此托运订单吗？确认后系统将自动扣除信息服务费，且信息费不予退还。",
-        confirmColor: "#1677ff",
-        success: async (res) => {
-          if (res.confirm) {
-            try {
-              await common_vendor.api.carrierConfirm(order.id);
-              common_vendor.index.showToast({ title: "确认订单成功", icon: "success" });
-              this.load();
-            } catch (err) {
-              console.error(err);
-            }
-          }
-        }
-      });
-    },
-    cancelOrderDirect(order) {
-      common_vendor.index.navigateTo({ url: `/pages/order/cancel-request?orderId=${order.id}` });
-    },
     signContract(order) {
       common_vendor.index.navigateTo({ url: `/pages/order/contract?orderId=${order.id}` });
     },
     setDriver(order) {
-      common_vendor.index.navigateTo({ url: `/pages/order/driver-form?orderId=${order.id}` });
+      common_vendor.index.navigateTo({ url: `/pages/order/driver-form?orderId=${order.id}&driverType=PICKUP` });
     },
-    pickupVehicle(order) {
+    promptSetPickupDriver(order) {
+      common_vendor.index.showModal({
+        title: "请先设置提车司机",
+        content: "确认提车前必须先设置提车司机。您可以立即设置，也可以稍后再操作。",
+        confirmText: "去设置",
+        cancelText: "稍后",
+        confirmColor: "#1677ff",
+        success: (res) => {
+          if (res.confirm) {
+            this.setDriver(order);
+          }
+        }
+      });
+    },
+    async pickupVehicle(order) {
+      var _a;
+      try {
+        const data = await common_vendor.api.orderDetail(order.id);
+        const pickupDriver = (_a = data.order) == null ? void 0 : _a.driverInfo;
+        if (!(pickupDriver == null ? void 0 : pickupDriver.driverName) || !(pickupDriver == null ? void 0 : pickupDriver.driverPhone)) {
+          this.promptSetPickupDriver(order);
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+        return;
+      }
       common_vendor.index.navigateTo({ url: `/pages/order/pickup?orderId=${order.id}` });
     },
     reportLocation(order) {
@@ -152,11 +179,13 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     }),
     b: !$data.isLoggedIn
   }, !$data.isLoggedIn ? {
-    c: common_vendor.o((...args) => $options.goLogin && $options.goLogin(...args), "aa")
+    c: common_assets._imports_0,
+    d: common_vendor.o((...args) => $options.goLogin && $options.goLogin(...args), "9a")
   } : !$data.loading && $data.orders.length === 0 ? {
-    e: common_vendor.o((...args) => $options.goHome && $options.goHome(...args), "7e")
+    f: common_assets._imports_1$3,
+    g: common_vendor.o((...args) => $options.goHome && $options.goHome(...args), "26")
   } : {
-    f: common_vendor.f($data.orders, (order, k0, i0) => {
+    h: common_vendor.f($data.orders, (order, k0, i0) => {
       return common_vendor.e({
         a: common_vendor.t(order.dealerName || "车商客户"),
         b: common_vendor.t($data.orderStatusText[order.orderStatus]),
@@ -168,44 +197,61 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
       } : {}, {
         g: common_vendor.t(order.originCityName),
         h: common_vendor.t(order.originProvinceName),
-        i: common_vendor.t(order.destinationCityName),
-        j: common_vendor.t(order.destinationProvinceName),
-        k: order.vehicles && order.vehicles.length
-      }, order.vehicles && order.vehicles.length ? {
-        l: common_vendor.t($options.formatVehicles(order.vehicles))
+        i: common_vendor.t(order.hasPickupService ? "需提车" : "不提车"),
+        j: order.hasPickupService ? 1 : "",
+        k: order.hasPickupService
+      }, order.hasPickupService ? {
+        l: common_vendor.t($options.formatServiceAddress(order, "origin"))
       } : {}, {
-        m: common_vendor.t($options.dateText(order.createdAt)),
-        n: common_vendor.t($options.yuanVal(order.orderAmountCent)),
-        o: common_vendor.o(($event) => $options.contactDealer(order), order.id),
-        p: order.orderStatus === "PENDING_CONFIRM"
+        m: common_vendor.t(order.destinationCityName),
+        n: common_vendor.t(order.destinationProvinceName),
+        o: common_vendor.t(order.hasDeliveryService ? "需送车" : "不送车"),
+        p: order.hasDeliveryService ? 1 : "",
+        q: order.hasDeliveryService
+      }, order.hasDeliveryService ? {
+        r: common_vendor.t($options.formatServiceAddress(order, "destination"))
+      } : {}, {
+        s: order.vehicles && order.vehicles.length
+      }, order.vehicles && order.vehicles.length ? {
+        t: common_assets._imports_2,
+        v: common_vendor.t($options.formatVehicles(order.vehicles))
+      } : {}, {
+        w: common_vendor.t($options.dateText(order.createdAt)),
+        x: common_vendor.t($options.yuanVal(order.orderAmountCent)),
+        y: $options.orderTimingTip(order)
+      }, $options.orderTimingTip(order) ? {
+        z: common_vendor.t($options.orderTimingTip(order))
+      } : {}, {
+        A: common_vendor.o(($event) => $options.contactDealer(order), order.id),
+        B: order.orderStatus === "PENDING_CONFIRM"
       }, order.orderStatus === "PENDING_CONFIRM" ? {
-        q: common_vendor.o(($event) => $options.cancelOrderDirect(order), order.id),
-        r: common_vendor.o(($event) => $options.confirmOrder(order), order.id)
+        C: common_vendor.o(($event) => $options.goDetail(order.id), order.id)
       } : order.orderStatus === "PENDING_CONTRACT" ? {
-        t: common_vendor.o(($event) => $options.signContract(order), order.id)
+        E: common_vendor.o(($event) => $options.signContract(order), order.id)
       } : order.orderStatus === "PENDING_PICKUP" ? {
-        w: common_vendor.o(($event) => $options.setDriver(order), order.id),
-        x: common_vendor.o(($event) => $options.pickupVehicle(order), order.id)
+        G: common_vendor.o(($event) => $options.setDriver(order), order.id),
+        H: common_vendor.o(($event) => $options.pickupVehicle(order), order.id)
       } : order.orderStatus === "IN_TRANSIT" ? {
-        z: common_vendor.o(($event) => $options.reportLocation(order), order.id),
-        A: common_vendor.o(($event) => $options.handoverVehicle(order), order.id)
+        J: common_vendor.o(($event) => $options.reportLocation(order), order.id),
+        K: common_vendor.o(($event) => $options.handoverVehicle(order), order.id)
       } : order.orderStatus === "CANCEL_PENDING" ? {
-        C: common_vendor.o(($event) => $options.handleCancel(order), order.id)
+        M: common_vendor.o(($event) => $options.handleCancel(order), order.id)
       } : {
-        D: common_vendor.o(($event) => $options.goDetail(order.id), order.id)
+        N: common_vendor.o(($event) => $options.goDetail(order.id), order.id)
       }, {
-        s: order.orderStatus === "PENDING_CONTRACT",
-        v: order.orderStatus === "PENDING_PICKUP",
-        y: order.orderStatus === "IN_TRANSIT",
-        B: order.orderStatus === "CANCEL_PENDING",
-        E: common_vendor.o(() => {
+        D: order.orderStatus === "PENDING_CONTRACT",
+        F: order.orderStatus === "PENDING_PICKUP",
+        I: order.orderStatus === "IN_TRANSIT",
+        L: order.orderStatus === "CANCEL_PENDING",
+        O: common_vendor.o(() => {
         }, order.id),
-        F: order.id,
-        G: common_vendor.o(($event) => $options.goDetail(order.id), order.id)
+        P: order.id,
+        Q: common_vendor.o(($event) => $options.goDetail(order.id), order.id)
       });
-    })
+    }),
+    i: common_assets._imports_0$2
   }, {
-    d: !$data.loading && $data.orders.length === 0
+    e: !$data.loading && $data.orders.length === 0
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

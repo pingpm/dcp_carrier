@@ -19,26 +19,31 @@ const _sfc_main = {
     if (!common_vendor.requireLogin())
       return;
     this.orderId = options.orderId;
+    if (["PICKUP", "HANDOVER"].includes(options.driverType)) {
+      this.form.driverType = options.driverType;
+    }
     this.loadCurrent();
   },
   methods: {
     async loadCurrent() {
-      var _a;
       try {
         const data = await common_vendor.api.orderDetail(this.orderId);
-        if ((_a = data.order) == null ? void 0 : _a.driverInfo) {
-          const d = data.order.driverInfo;
-          this.form = {
-            driverType: "PICKUP",
-            driverName: d.driverName || "",
-            driverPhone: d.driverPhone || "",
-            licensePlate: d.licensePlate || "",
-            idNumber: d.idNumber || ""
-          };
-        }
+        this.fillDriverForm(data.order, this.form.driverType);
       } catch (err) {
         console.error(err);
       }
+    },
+    fillDriverForm(order, type) {
+      const driver = type === "HANDOVER" ? order == null ? void 0 : order.deliveryDriverInfo : order == null ? void 0 : order.driverInfo;
+      if (!driver)
+        return;
+      this.form = {
+        driverType: type,
+        driverName: driver.driverName || "",
+        driverPhone: driver.driverPhone || "",
+        licensePlate: driver.licensePlate || "",
+        idNumber: driver.idNumber || ""
+      };
     },
     setDriverType(type) {
       this.form.driverType = type;

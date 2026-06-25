@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "提交充值凭证",
+  "usingComponents": {
+    "miniapp-login-sheet": "../../components/miniapp-login-sheet/miniapp-login-sheet"
+  }
+}

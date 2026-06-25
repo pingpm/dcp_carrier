@@ -10,6 +10,9 @@ const _sfc_main = {
         registeredPhone: "",
         avatarUrl: ""
       },
+      profile: {
+        companyName: ""
+      },
       reviewStatus: "UNVERIFIED",
       reviewStatusText: common_vendor.reviewStatusText,
       walletData: {
@@ -21,6 +24,9 @@ const _sfc_main = {
     };
   },
   computed: {
+    displayName() {
+      return this.profile.companyName || this.userInfo.nickname || "承运商用户";
+    },
     reviewStatusLabel() {
       const map = {
         APPROVED: "已认证",
@@ -29,18 +35,29 @@ const _sfc_main = {
       };
       return map[this.reviewStatus] || "未认证";
     },
+    isVerificationApproved() {
+      return this.reviewStatus === "APPROVED";
+    },
     isDepositLow() {
-      return this.walletData.depositBalanceCent < this.walletData.depositMinimumCent;
+      return this.isVerificationApproved && Boolean(this.walletData.isDepositBelowMinimum);
     },
     isInfoFeeLow() {
-      return this.walletData.infoFeeBalanceCent <= 0;
+      return this.isVerificationApproved && Boolean(this.walletData.isInfoFeeInsufficient);
+    },
+    hasWalletRisk() {
+      return this.isDepositLow || this.isInfoFeeLow;
     },
     walletWarnText() {
       if (this.isDepositLow && this.isInfoFeeLow)
         return "保证金不足 · 信息费耗尽";
       if (this.isDepositLow)
         return "保证金低于最低要求";
-      return "信息费余额不足";
+      if (this.isInfoFeeLow)
+        return "信息费余额不足";
+      if (this.walletData.isDepositCheckEnabled === false || this.walletData.isInfoFeeCheckEnabled === false) {
+        return "搜索联系限制已关闭";
+      }
+      return "";
     }
   },
   onShow() {
@@ -61,6 +78,9 @@ const _sfc_main = {
         nickname: "",
         registeredPhone: "",
         avatarUrl: ""
+      };
+      this.profile = {
+        companyName: ""
       };
       this.reviewStatus = "UNVERIFIED";
       this.walletData = {
@@ -93,7 +113,16 @@ const _sfc_main = {
         const res = await common_vendor.api.me();
         if (res) {
           this.userInfo = res.user || {};
+          this.profile = res.profile || {};
           this.reviewStatus = res.reviewStatus || "UNVERIFIED";
+          if (!this.profile.companyName) {
+            const status = await common_vendor.api.verificationStatus({ authRedirect: false });
+            this.profile = {
+              ...this.profile,
+              companyName: (status == null ? void 0 : status.companyName) || ""
+            };
+            this.reviewStatus = (status == null ? void 0 : status.reviewStatus) || this.reviewStatus;
+          }
         }
       } catch (error) {
         console.error("获取个人信息失败:", error);
@@ -115,7 +144,8 @@ const _sfc_main = {
     goVerification() {
       if (!this.ensureLoggedIn("企业资质认证"))
         return;
-      common_vendor.index.navigateTo({ url: "/pages/verification/status" });
+      const url = this.reviewStatus === "UNVERIFIED" || this.reviewStatus === "REJECTED" ? "/pages/verification/form" : "/pages/verification/status";
+      common_vendor.index.navigateTo({ url });
     },
     goCompanyProfile() {
       if (!this.ensureLoggedIn("企业介绍"))
@@ -146,43 +176,59 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
     a: !$data.isLoggedIn
   }, !$data.isLoggedIn ? {
-    b: common_assets._imports_0$1,
-    c: common_vendor.o((...args) => $options.goLogin && $options.goLogin(...args), "83"),
+    b: common_assets._imports_0,
+    c: common_vendor.o((...args) => $options.goLogin && $options.goLogin(...args), "c6"),
     d: common_vendor.o((...args) => $options.goLogin && $options.goLogin(...args), "8a")
   } : {
-    e: $data.userInfo.avatarUrl || "/static/default_avatar.png",
-    f: common_vendor.t($data.userInfo.nickname || "承运商用户"),
+    e: $data.userInfo.avatarUrl || "/static/icons/user.svg",
+    f: common_vendor.t($options.displayName),
     g: common_vendor.t($options.reviewStatusLabel),
     h: common_vendor.n($data.reviewStatus.toLowerCase()),
     i: common_vendor.t($data.userInfo.registeredPhone || "未绑定手机"),
-    j: common_vendor.o((...args) => $options.goVerification && $options.goVerification(...args), "62")
+    j: common_assets._imports_1,
+    k: common_vendor.o((...args) => $options.goVerification && $options.goVerification(...args), "10")
   }, {
-    k: common_vendor.t($options.yuanVal($data.walletData.depositBalanceCent)),
-    l: $data.isLoggedIn && $options.isDepositLow ? 1 : "",
-    m: common_vendor.t($options.yuanVal($data.walletData.infoFeeBalanceCent)),
-    n: $data.isLoggedIn && $options.isInfoFeeLow ? 1 : "",
-    o: $data.isLoggedIn && ($options.isDepositLow || $options.isInfoFeeLow)
-  }, $data.isLoggedIn && ($options.isDepositLow || $options.isInfoFeeLow) ? {
-    p: common_vendor.t($options.walletWarnText)
+    l: common_assets._imports_2$2,
+    m: common_assets._imports_1,
+    n: common_vendor.t($options.yuanVal($data.walletData.depositBalanceCent)),
+    o: $data.isLoggedIn && $options.isDepositLow ? 1 : "",
+    p: common_vendor.t($options.yuanVal($data.walletData.infoFeeBalanceCent)),
+    q: $data.isLoggedIn && $options.isInfoFeeLow ? 1 : "",
+    r: $data.isLoggedIn && $options.hasWalletRisk
+  }, $data.isLoggedIn && $options.hasWalletRisk ? {
+    s: common_assets._imports_3,
+    t: common_vendor.t($options.walletWarnText)
   } : {}, {
-    q: common_vendor.o((...args) => $options.goWallet && $options.goWallet(...args), "0c"),
-    r: $data.isLoggedIn && $data.reviewStatus !== "APPROVED"
+    v: common_vendor.o((...args) => $options.goWallet && $options.goWallet(...args), "12"),
+    w: $data.isLoggedIn && $data.reviewStatus !== "APPROVED"
   }, $data.isLoggedIn && $data.reviewStatus !== "APPROVED" ? {
-    s: common_vendor.o((...args) => $options.goVerification && $options.goVerification(...args), "d3")
+    x: common_assets._imports_3,
+    y: common_assets._imports_1,
+    z: common_vendor.o((...args) => $options.goVerification && $options.goVerification(...args), "6b")
   } : {}, {
-    t: $data.routeCount > 0
+    A: common_assets._imports_4,
+    B: $data.routeCount > 0
   }, $data.routeCount > 0 ? {
-    v: common_vendor.t($data.routeCount)
+    C: common_vendor.t($data.routeCount)
   } : {}, {
-    w: common_vendor.o((...args) => $options.goRoutes && $options.goRoutes(...args), "d1"),
-    x: common_vendor.o((...args) => $options.goWallet && $options.goWallet(...args), "e8"),
-    y: common_vendor.t($data.reviewStatusText[$data.reviewStatus] || "未认证"),
-    z: $data.reviewStatus === "APPROVED" ? 1 : "",
-    A: $data.reviewStatus === "PENDING" ? 1 : "",
-    B: $data.reviewStatus === "REJECTED" ? 1 : "",
-    C: common_vendor.o((...args) => $options.goVerification && $options.goVerification(...args), "15"),
-    D: common_vendor.o((...args) => $options.goCompanyProfile && $options.goCompanyProfile(...args), "1e"),
-    E: common_vendor.o((...args) => $options.goSettings && $options.goSettings(...args), "44")
+    D: common_assets._imports_1,
+    E: common_vendor.o((...args) => $options.goRoutes && $options.goRoutes(...args), "ac"),
+    F: common_assets._imports_2$2,
+    G: common_assets._imports_1,
+    H: common_vendor.o((...args) => $options.goWallet && $options.goWallet(...args), "e0"),
+    I: common_assets._imports_5,
+    J: common_vendor.t($data.reviewStatusText[$data.reviewStatus] || "未认证"),
+    K: $data.reviewStatus === "APPROVED" ? 1 : "",
+    L: $data.reviewStatus === "PENDING" ? 1 : "",
+    M: $data.reviewStatus === "REJECTED" ? 1 : "",
+    N: common_assets._imports_1,
+    O: common_vendor.o((...args) => $options.goVerification && $options.goVerification(...args), "c2"),
+    P: common_assets._imports_6,
+    Q: common_assets._imports_1,
+    R: common_vendor.o((...args) => $options.goCompanyProfile && $options.goCompanyProfile(...args), "f5"),
+    S: common_assets._imports_7,
+    T: common_assets._imports_1,
+    U: common_vendor.o((...args) => $options.goSettings && $options.goSettings(...args), "bb")
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

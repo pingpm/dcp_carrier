@@ -16,8 +16,9 @@
   margin-bottom: 20rpx;
 }
 .warn-icon-modern {
-  font-size: 30rpx;
-  line-height: 1;
+  width: 32rpx;
+  height: 32rpx;
+  flex-shrink: 0;
 }
 .warn-title-modern {
   font-size: 28rpx;

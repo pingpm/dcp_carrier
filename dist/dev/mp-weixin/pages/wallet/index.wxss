@@ -76,8 +76,10 @@
   border-bottom: 0;
 }
 .link-icon {
-  font-size: 36rpx;
+  width: 38rpx;
+  height: 38rpx;
   margin-right: 18rpx;
+  flex-shrink: 0;
 }
 .link-label {
   font-size: 28rpx;
@@ -85,6 +87,6 @@
   font-weight: 500;
 }
 .link-arrow {
-  color: #9ca3af;
-  font-size: 24rpx;
+  width: 28rpx;
+  height: 28rpx;
 }

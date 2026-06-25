@@ -15,43 +15,72 @@
       <image class="arrow-icon" src="/static/icons/arrow-right.svg" mode="aspectFit" />
     </view>
 
-    <!-- Deposit balance card -->
-    <view class="section balance-card deposit">
-      <view class="row-between align-center">
-        <view class="balance-meta">
-          <text class="balance-label">货运保证金 (元)</text>
-          <text class="balance-value font-bold">{{ yuanVal(wallet.depositBalanceCent) }}</text>
-        </view>
-        <button class="primary-btn recharge-btn-mini" @click="goRecharge('DEPOSIT')">充值</button>
+    <view class="accounts-section">
+      <view class="accounts-head">
+        <text class="accounts-title">账户余额</text>
+        <text class="accounts-desc">充值后余额实时更新，对公转账需财务审核入账</text>
       </view>
-      <view class="balance-footer">
-        <text>最低限额标准: {{ yuanText(wallet.depositMinimumCent) }}</text>
-        <text
-          class="status-tag mini-tag"
-          :class="isDepositBelowMinimum ? 'status-danger' : 'status-success'"
-        >
-          {{ depositStatusLabel }}
-        </text>
-      </view>
-    </view>
 
-    <!-- Info fee balance card -->
-    <view class="section balance-card info-fee">
-      <view class="row-between align-center">
-        <view class="balance-meta">
-          <text class="balance-label">信息服务费 (元)</text>
-          <text class="balance-value font-bold">{{ yuanVal(wallet.infoFeeBalanceCent) }}</text>
+      <view class="account-card deposit">
+        <view class="account-top">
+          <view class="account-title-row">
+            <view class="account-icon">
+              <image src="/static/icons/shield-check.svg" mode="aspectFit" />
+            </view>
+            <view class="account-copy">
+              <text class="account-name">货运保证金</text>
+              <text class="account-rule">最低标准 {{ yuanText(wallet.depositMinimumCent) }}</text>
+            </view>
+          </view>
+          <text
+            class="account-status"
+            :class="isDepositBelowMinimum ? 'status-danger-soft' : 'status-success-soft'"
+          >
+            {{ depositStatusLabel }}
+          </text>
         </view>
-        <button class="primary-btn recharge-btn-mini" @click="goRecharge('INFO_FEE')">充值</button>
+
+        <view class="account-bottom">
+          <view class="balance-meta">
+            <text class="balance-label">当前余额</text>
+            <view class="balance-amount">
+              <text class="balance-value">{{ yuanVal(wallet.depositBalanceCent) }}</text>
+              <text class="balance-unit">元</text>
+            </view>
+          </view>
+          <button class="recharge-btn-mini" @click="goRecharge('DEPOSIT')">充值</button>
+        </view>
       </view>
-      <view class="balance-footer">
-        <text>按单按次确认扣费, 多充不限</text>
-        <text
-          class="status-tag mini-tag"
-          :class="isInfoFeeInsufficient ? 'status-danger' : 'status-success'"
-        >
-          {{ infoFeeStatusLabel }}
-        </text>
+
+      <view class="account-card info-fee">
+        <view class="account-top">
+          <view class="account-title-row">
+            <view class="account-icon">
+              <image src="/static/icons/credit-card.svg" mode="aspectFit" />
+            </view>
+            <view class="account-copy">
+              <text class="account-name">信息服务费</text>
+              <text class="account-rule">确认接单时按单扣费</text>
+            </view>
+          </view>
+          <text
+            class="account-status"
+            :class="isInfoFeeInsufficient ? 'status-danger-soft' : 'status-success-soft'"
+          >
+            {{ infoFeeStatusLabel }}
+          </text>
+        </view>
+
+        <view class="account-bottom">
+          <view class="balance-meta">
+            <text class="balance-label">当前余额</text>
+            <view class="balance-amount">
+              <text class="balance-value">{{ yuanVal(wallet.infoFeeBalanceCent) }}</text>
+              <text class="balance-unit">元</text>
+            </view>
+          </view>
+          <button class="recharge-btn-mini" @click="goRecharge('INFO_FEE')">充值</button>
+        </view>
       </view>
     </view>
 
@@ -61,35 +90,53 @@
       <view class="links-list">
         <view class="link-item" @click="goLink('/pages/wallet/recharge-records')">
           <view class="row align-center">
-            <image class="link-icon" src="/static/icons/credit-card.svg" mode="aspectFit" />
-            <text class="link-label">在线充值记录</text>
+            <view class="link-icon-wrap blue">
+              <image class="link-icon" src="/static/icons/credit-card.svg" mode="aspectFit" />
+            </view>
+            <view class="link-copy">
+              <text class="link-label">充值记录</text>
+              <text class="link-desc">微信支付 / 对公转账凭证</text>
+            </view>
           </view>
           <image class="link-arrow" src="/static/icons/arrow-right.svg" mode="aspectFit" />
         </view>
         <view class="link-item" @click="goLink('/pages/wallet/info-fee-deductions')">
           <view class="row align-center">
-            <image class="link-icon" src="/static/icons/trending-down.svg" mode="aspectFit" />
-            <text class="link-label">订单信息费扣费清单</text>
+            <view class="link-icon-wrap red">
+              <image class="link-icon" src="/static/icons/trending-down.svg" mode="aspectFit" />
+            </view>
+            <view class="link-copy">
+              <text class="link-label">信息费扣费记录</text>
+              <text class="link-desc">按订单查看扣费明细</text>
+            </view>
           </view>
           <image class="link-arrow" src="/static/icons/arrow-right.svg" mode="aspectFit" />
         </view>
         <view class="link-item" @click="goLink('/pages/wallet/transactions')">
           <view class="row align-center">
-            <image class="link-icon" src="/static/icons/receipt.svg" mode="aspectFit" />
-            <text class="link-label">钱包变更账单总流水</text>
+            <view class="link-icon-wrap slate">
+              <image class="link-icon" src="/static/icons/receipt.svg" mode="aspectFit" />
+            </view>
+            <view class="link-copy">
+              <text class="link-label">钱包流水</text>
+              <text class="link-desc">查看全部余额变更</text>
+            </view>
           </view>
           <image class="link-arrow" src="/static/icons/arrow-right.svg" mode="aspectFit" />
         </view>
       </view>
     </view>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
+import { miniappLoginPageMixin } from '../../utils/miniapp-login-page.js';
 import { api, requireLogin } from '../../utils/api.js';
 import { yuanText } from '../../utils/format.js';
 
 export default {
+  mixins: [miniappLoginPageMixin],
   data() {
     return {
       wallet: {
@@ -145,77 +192,188 @@ export default {
 
 <style>
 .wallet-index-page {
-  padding: 30rpx;
+  padding: 24rpx;
   padding-bottom: calc(50rpx + env(safe-area-inset-bottom));
 }
 
-
-
-/* Balance Cards */
-.balance-card {
-  padding: 40rpx;
-  border-radius: var(--radius-lg);
-  color: #ffffff;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 12rpx 28rpx rgba(17, 24, 39, 0.04);
+.accounts-section {
+  margin-top: 0;
 }
 
-.balance-card.deposit {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+.accounts-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  margin: 0 4rpx 16rpx;
 }
 
-.balance-card.info-fee {
-  background: linear-gradient(135deg, #10b981, #047857);
+.accounts-title {
+  color: #111827;
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.accounts-desc {
+  color: #64748b;
+  font-size: 22rpx;
+  line-height: 1.35;
+}
+
+.account-card {
+  padding: 24rpx;
+  border-radius: 16rpx;
+  border: 1rpx solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: 0 10rpx 28rpx rgba(15, 23, 42, 0.05);
+  margin-bottom: 18rpx;
+}
+
+.account-card.deposit {
+  border-left: 8rpx solid #2563eb;
+}
+
+.account-card.info-fee {
+  border-left: 8rpx solid #059669;
+}
+
+.account-top,
+.account-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.account-bottom {
+  margin-top: 24rpx;
+}
+
+.account-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  min-width: 0;
+}
+
+.account-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.account-icon image {
+  width: 34rpx;
+  height: 34rpx;
+}
+
+.deposit .account-icon {
+  background: #eff6ff;
+}
+
+.info-fee .account-icon {
+  background: #ecfdf5;
+}
+
+.account-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  min-width: 0;
+}
+
+.account-name {
+  color: #111827;
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.account-rule {
+  color: #64748b;
+  font-size: 22rpx;
+}
+
+.account-status {
+  flex-shrink: 0;
+  min-height: 44rpx;
+  line-height: 44rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.status-success-soft {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.status-danger-soft {
+  color: #b91c1c;
+  background: #fee2e2;
 }
 
 .balance-meta {
   display: flex;
   flex-direction: column;
+  gap: 4rpx;
 }
 
 .balance-label {
-  font-size: 24rpx;
-  opacity: 0.85;
-  margin-bottom: 8rpx;
+  font-size: 22rpx;
+  color: #64748b;
+}
+
+.balance-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
 }
 
 .balance-value {
-  font-size: 54rpx;
+  color: #111827;
+  font-size: 42rpx;
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.balance-unit {
+  color: #64748b;
+  font-size: 22rpx;
 }
 
 .recharge-btn-mini {
-  background: #ffffff !important;
-  color: #1d4ed8 !important;
-  min-height: 70rpx !important;
-  font-size: 26rpx !important;
-  padding: 0 36rpx !important;
-  border-radius: 35rpx !important;
-  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.08) !important;
+  flex-shrink: 0;
+  margin: 0;
+  min-width: 128rpx;
+  height: 62rpx;
+  line-height: 62rpx;
+  padding: 0 28rpx;
+  border-radius: 12rpx;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 800;
 }
 
 .info-fee .recharge-btn-mini {
-  color: #047857 !important;
+  background: #059669;
 }
 
-.balance-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 30rpx;
-  padding-top: 20rpx;
-  border-top: 1rpx solid rgba(255, 255, 255, 0.15);
-  font-size: 20rpx;
-  opacity: 0.9;
-}
-
-.mini-tag {
-  min-height: 38rpx !important;
-  font-size: 18rpx !important;
-  padding: 0 16rpx !important;
+.recharge-btn-mini::after {
+  border: none;
 }
 
 /* Links lists */
+.links-section-card {
+  margin-top: 24rpx;
+  padding: 24rpx 28rpx;
+  border-radius: 16rpx;
+}
+
 .links-list {
   display: flex;
   flex-direction: column;
@@ -225,7 +383,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 28rpx 0;
+  padding: 24rpx 0;
   border-bottom: 1rpx solid #f1f5f9;
 }
 
@@ -233,17 +391,50 @@ export default {
   border-bottom: 0;
 }
 
-.link-icon {
-  width: 38rpx;
-  height: 38rpx;
+.link-icon-wrap {
+  width: 56rpx;
+  height: 56rpx;
   margin-right: 18rpx;
+  border-radius: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+}
+
+.link-icon-wrap.blue {
+  background: #eff6ff;
+}
+
+.link-icon-wrap.red {
+  background: #fef2f2;
+}
+
+.link-icon-wrap.slate {
+  background: #f8fafc;
+}
+
+.link-icon {
+  width: 32rpx;
+  height: 32rpx;
+}
+
+.link-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  min-width: 0;
 }
 
 .link-label {
   font-size: 28rpx;
   color: #111827;
-  font-weight: 500;
+  font-weight: 700;
+}
+
+.link-desc {
+  color: #64748b;
+  font-size: 22rpx;
 }
 
 .link-arrow {

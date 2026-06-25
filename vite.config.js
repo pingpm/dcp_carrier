@@ -46,6 +46,10 @@ export default defineConfig(() => {
           target: process.env.API_PROXY_TARGET || H5_API_PROXY_TARGET,
           changeOrigin: true,
         },
+        '/uploads': {
+          target: process.env.API_PROXY_TARGET || H5_API_PROXY_TARGET,
+          changeOrigin: true,
+        },
       },
     },
   };

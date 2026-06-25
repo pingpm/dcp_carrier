@@ -1,6 +1,6 @@
 {
   "navigationBarTitleText": "确认提车",
   "usingComponents": {
-    "region-picker": "../../components/region-picker/region-picker"
+    "carrier-image-uploader": "../../components/carrier-image-uploader/carrier-image-uploader"
   }
 }

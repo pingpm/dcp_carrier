@@ -14,6 +14,7 @@
     "pages/order/handover",
     "pages/order/cancel-request",
     "pages/order/cancel-handle",
+    "pages/order/compensation-handle",
     "pages/route/list",
     "pages/route/form",
     "pages/route/tier-template",

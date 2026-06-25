@@ -20,18 +20,37 @@
         @select="onRegionSelect"
       />
 
-      <view class="field">
-        <text class="label">详细在途位置/路段 <text class="required">*</text></text>
+      <view class="field transit-address-field">
+        <view class="field-label-row">
+          <text class="label">详细在途位置/路段</text>
+          <text class="optional-tag">选填</text>
+        </view>
         <view
           class="picker-display transit-address-display"
-          :class="{ disabled: !cityId }"
+          :class="{ disabled: !cityId, selected: addressDetail }"
           @click="openAddressPicker"
         >
+          <view class="address-icon-wrap">
+            <image class="address-icon" src="/static/icons/map-pin.svg" mode="aspectFit" />
+          </view>
           <view v-if="addressDetail" class="address-summary">
             <text class="address-summary-name">{{ addressName || addressDetail }}</text>
-            <text v-if="addressDetail" class="address-summary-detail">{{ addressDetail }}</text>
+            <text
+              v-if="addressDetail && addressDetail !== addressName"
+              class="address-summary-detail"
+            >
+              {{ addressDetail }}
+            </text>
           </view>
-          <text v-else style="color: #9ca3af">在地图上搜索或选择当前位置</text>
+          <view v-else class="address-placeholder-wrap">
+            <text class="address-placeholder">
+              {{ cityId ? '可在地图上搜索或选择当前位置' : '请先选择当前省市' }}
+            </text>
+            <text class="address-placeholder-tip">
+              未选择时将使用{{ cityName || '当前城市' }}中心点上报
+            </text>
+          </view>
+          <text class="picker-chevron">⌄</text>
         </view>
       </view>
 
@@ -64,15 +83,18 @@
         上报当前最新位置
       </button>
     </view>
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
+import { miniappLoginPageMixin } from '../../utils/miniapp-login-page.js';
 import { api, requireLogin } from '../../utils/api.js';
 import AddressMapPicker from '../../components/address-map-picker/address-map-picker.vue';
 import RegionSelectField from '../../components/region-select-field/region-select-field.vue';
 
 export default {
+  mixins: [miniappLoginPageMixin],
   components: {
     AddressMapPicker,
     RegionSelectField,
@@ -88,6 +110,8 @@ export default {
       addressDetail: '',
       latitude: '',
       longitude: '',
+      cityLatitude: '',
+      cityLongitude: '',
       remark: '',
       submitting: false,
     };
@@ -103,6 +127,8 @@ export default {
       this.provinceName = region.provinceName;
       this.cityId = region.cityId;
       this.cityName = region.cityName;
+      this.cityLongitude = region.cityLongitude || '';
+      this.cityLatitude = region.cityLatitude || '';
       if (cityChanged) {
         this.addressName = '';
         this.addressDetail = '';
@@ -135,6 +161,8 @@ export default {
       this.provinceName = '上海市';
       this.cityId = '310100';
       this.cityName = '上海市';
+      this.cityLongitude = '121.433300';
+      this.cityLatitude = '31.246707';
       this.addressName = 'G2高速上海方向服务区';
       this.addressDetail = 'G2高速上海方向服务区，距离目的地约35公里';
       this.latitude = '31.246707';
@@ -146,12 +174,8 @@ export default {
         uni.showToast({ title: '请选择当前运输省市', icon: 'none' });
         return false;
       }
-      if (!this.addressDetail.trim()) {
-        uni.showToast({ title: '请选择详细在途位置', icon: 'none' });
-        return false;
-      }
-      if (!this.latitude || !this.longitude) {
-        uni.showToast({ title: '请在地图上确认在途位置', icon: 'none' });
+      if ((!this.latitude || !this.longitude) && (!this.cityLatitude || !this.cityLongitude)) {
+        uni.showToast({ title: '当前城市暂无坐标，请选择详细位置', icon: 'none' });
         return false;
       }
       return true;
@@ -165,9 +189,9 @@ export default {
           provinceName: this.provinceName,
           cityId: this.cityId,
           cityName: this.cityName,
-          addressDetail: this.addressDetail,
-          latitude: Number(this.latitude),
-          longitude: Number(this.longitude),
+          addressDetail: this.addressDetail || this.cityName,
+          latitude: Number(this.latitude || this.cityLatitude),
+          longitude: Number(this.longitude || this.cityLongitude),
           remark: this.remark,
         };
         await api.reportTransitLocation(this.orderId, payload);
@@ -214,28 +238,85 @@ export default {
   font-weight: bold;
 }
 
+.transit-address-field {
+  margin-top: 26rpx;
+}
+
+.field-label-row {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  margin-bottom: 14rpx;
+}
+
+.optional-tag {
+  padding: 2rpx 10rpx;
+  border-radius: 999rpx;
+  background: #eef6ff;
+  color: #1677ff;
+  font-size: 20rpx;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
 .transit-address-display {
-  min-height: 92rpx;
-  align-items: flex-start;
-  padding-top: 18rpx;
-  padding-bottom: 18rpx;
+  min-height: 104rpx;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 20rpx 18rpx;
+  border-radius: 14rpx;
+  border: 1rpx solid #dbeafe;
+  background: #f8fbff;
+  box-sizing: border-box;
 }
 
 .transit-address-display.disabled {
-  background: #f3f4f6;
-  color: #9ca3af;
+  border-color: #e5e7eb;
+  background: #f9fafb;
+}
+
+.transit-address-display.selected {
+  border-color: #93c5fd;
+  background: #ffffff;
+  box-shadow: 0 8rpx 22rpx rgba(22, 119, 255, 0.08);
+}
+
+.transit-address-display::after {
+  display: none;
+}
+
+.address-icon-wrap {
+  flex-shrink: 0;
+  width: 54rpx;
+  height: 54rpx;
+  border-radius: 16rpx;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.transit-address-display.disabled .address-icon-wrap {
+  background: #f1f5f9;
+}
+
+.address-icon {
+  width: 30rpx;
+  height: 30rpx;
 }
 
 .address-summary {
   display: flex;
   flex-direction: column;
-  gap: 6rpx;
-  width: 100%;
+  gap: 8rpx;
+  flex: 1;
+  min-width: 0;
 }
 
 .address-summary-name {
   color: #111827;
-  font-size: 26rpx;
+  font-size: 27rpx;
   font-weight: 700;
   line-height: 1.35;
 }
@@ -244,6 +325,43 @@ export default {
   color: #6b7280;
   font-size: 23rpx;
   line-height: 1.45;
+}
+
+.address-placeholder-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.address-placeholder {
+  color: #94a3b8;
+  font-size: 26rpx;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.address-placeholder-tip {
+  color: #cbd5e1;
+  font-size: 21rpx;
+  line-height: 1.3;
+}
+
+.transit-address-display.disabled .address-placeholder,
+.transit-address-display.disabled .address-placeholder-tip {
+  color: #cbd5e1;
+}
+
+.picker-chevron {
+  flex-shrink: 0;
+  color: #94a3b8;
+  font-size: 34rpx;
+  line-height: 1;
+}
+
+.transit-address-display.selected .picker-chevron {
+  color: #1677ff;
 }
 
 .dev-location-btn {

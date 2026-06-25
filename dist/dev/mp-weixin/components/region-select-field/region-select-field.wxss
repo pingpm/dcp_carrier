@@ -1,0 +1,12 @@
+.required {
+  color: #ef4444;
+  margin-left: 6rpx;
+  font-weight: bold;
+}
+.region-select-display.disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+}
+.region-select-placeholder {
+  color: #9ca3af;
+}

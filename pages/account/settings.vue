@@ -39,7 +39,7 @@ export default {
               icon: 'success',
             });
             setTimeout(() => {
-              uni.reLaunch({ url: '/pages/auth/login' });
+              uni.switchTab({ url: '/pages/home/index' });
             }, 600);
           }
         },

@@ -54,6 +54,11 @@
         "setting" : {
             "urlCheck" : false
         },
+        "permission" : {
+            "scope.writeClipboard" : {
+                "desc" : "用于复制对公转账账户和转账备注信息"
+            }
+        },
         "usingComponents" : true,
         "uniStatistics" : {
             "enable" : true

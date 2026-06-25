@@ -9,7 +9,11 @@
 
     <scroll-view class="agreement-scroll" scroll-y>
       <view class="agreement-content">
-        <view v-for="section in agreement.sections" :key="section.heading" class="agreement-section">
+        <view
+          v-for="section in agreement.sections"
+          :key="section.heading"
+          class="agreement-section"
+        >
           <view class="section-heading">{{ section.heading }}</view>
           <view v-for="paragraph in section.paragraphs" :key="paragraph" class="section-paragraph">
             {{ paragraph }}
@@ -39,14 +43,14 @@ const agreements = {
         heading: '二、入驻认证与服务能力',
         paragraphs: [
           '您需按照平台要求提交企业名称、统一社会信用代码、法人或委托人资料、服务能力、道路运输经营许可证、办公地址和经营照片等资料。',
-          '您选择大板线路后，可维护大板线路；选择小板线路后，可维护小板线路。代驾能力为保留字段，本期不展示、不开放业务功能。',
+          '您注册为轿运公司后，可维护大板、小板和代驾线路；注册为道路救援公司后，可维护小板和代驾线路。',
           '您提交的认证资料应真实、准确、完整且持续有效。资料虚假、过期、冒用或无法核验时，平台有权限制展示、接单、确认订单等能力。',
         ],
       },
       {
         heading: '三、线路维护与报价展示',
         paragraphs: [
-          '您可在承运商端维护大板或小板线路、价格、时效和阶梯价模板。线路信息将影响车商搜索结果和订单发起决策。',
+          '您可在承运商端维护大板、小板或代驾线路、价格、时效和阶梯价模板。线路信息将影响车商搜索结果和订单发起决策。',
           '未认证或认证未通过时，您可先维护线路，但线路不会对车商展示，也不能用于接单。',
           '您应确保线路、报价、时效、服务能力和企业介绍真实可靠，不得发布虚假路线、误导报价或无法履约的运输能力。',
         ],

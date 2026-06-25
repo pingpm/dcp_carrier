@@ -1,6 +1,6 @@
 .order-detail-page {
   padding: 24rpx;
-  padding-bottom: calc(260rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(170rpx + env(safe-area-inset-bottom));
   background-color: #f8fafc;
 }
 .order-hero-card {
@@ -18,7 +18,12 @@
   gap: 28rpx;
 }
 .hero-status-icon {
-  font-size: 54rpx;
+  width: 54rpx;
+  height: 54rpx;
+  flex-shrink: 0;
+  border-radius: 16rpx;
+  padding: 8rpx;
+  background: rgba(255, 255, 255, 0.88);
 }
 .hero-status-meta {
   display: flex;
@@ -60,6 +65,50 @@
   text-align: center;
   padding: 10rpx 0 20rpx;
   font-weight: bold;
+}
+.dealer-summary-card {
+  padding: 30rpx 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+.dealer-summary-main {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  flex: 1;
+}
+.dealer-summary-icon {
+  width: 46rpx;
+  height: 46rpx;
+  flex-shrink: 0;
+}
+.dealer-summary-name {
+  min-width: 0;
+  flex: 1;
+  color: #111827;
+  font-size: 32rpx;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dealer-contact-btn {
+  margin: 0;
+  padding: 0;
+  height: 52rpx;
+  line-height: 52rpx;
+  background: transparent;
+  border: 0;
+  color: #ef4444;
+  font-size: 26rpx;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.dealer-contact-btn::after {
+  border: 0;
 }
 .detail-route-flow {
   display: flex;
@@ -103,11 +152,12 @@
   background: #e5e7eb;
 }
 .flow-icon {
-  font-size: 30rpx;
+  width: 34rpx;
+  height: 34rpx;
   position: absolute;
-  top: -24rpx;
+  top: -26rpx;
   background: #f9fafb;
-  padding: 0 4rpx;
+  padding: 0 6rpx;
 }
 .flow-mode-tag {
   font-size: 18rpx;
@@ -164,6 +214,39 @@
   color: #4b5563;
   font-weight: bold;
 }
+.service-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.service-info-item {
+  padding: 22rpx 24rpx;
+  border: 1rpx solid #f1f5f9;
+  border-radius: var(--radius-md);
+  background: #f9fafb;
+}
+.service-info-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 18rpx;
+}
+.service-info-title {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #111827;
+}
+.detail-row.service-address-row {
+  align-items: flex-start;
+  gap: 24rpx;
+}
+.service-address {
+  flex: 1;
+  text-align: right;
+  line-height: 1.45;
+  word-break: break-all;
+}
 .detail-vehicle-item {
   border: 1rpx solid #f3f4f6;
   border-radius: var(--radius-md);
@@ -183,7 +266,9 @@
   margin-bottom: 18rpx;
 }
 .vehicle-icon {
-  font-size: 32rpx;
+  width: 34rpx;
+  height: 34rpx;
+  flex-shrink: 0;
 }
 .vehicle-title {
   font-size: 28rpx;
@@ -285,6 +370,66 @@
   padding: 8rpx 12rpx;
   border-radius: 6rpx;
   margin-top: 4rpx;
+}
+.detail-footer-actions {
+  padding-top: 18rpx;
+}
+.compact-actions {
+  gap: 14rpx;
+}
+.footer-action-btn {
+  flex: 1;
+  min-width: 0;
+  min-height: 84rpx !important;
+  font-size: 28rpx !important;
+  padding: 0 22rpx !important;
+  border-radius: 12rpx !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+.primary-action {
+  flex: 1.35;
+}
+.more-action-btn {
+  width: 104rpx;
+  min-width: 104rpx;
+  min-height: 84rpx !important;
+  padding: 0 !important;
+  border-radius: 12rpx !important;
+  flex-direction: column;
+  gap: 2rpx;
+  font-size: 20rpx !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+.more-action-icon {
+  width: 32rpx;
+  height: 24rpx;
+}
+.more-actions-drawer {
+  padding-top: 30rpx;
+}
+.more-action-item {
+  min-height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1rpx solid #f1f5f9;
+}
+.more-action-item:last-child {
+  border-bottom: 0;
+}
+.more-action-label {
+  color: #111827;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.more-action-item.danger .more-action-label {
+  color: #dc2626;
+}
+.more-action-arrow {
+  width: 28rpx;
+  height: 28rpx;
 }
 .timeline-container {
   display: flex;
@@ -389,4 +534,13 @@
 }
 .w-full {
   width: 100%;
+}
+.empty-media-text {
+  margin-top: 16rpx;
+  padding: 24rpx;
+  border-radius: var(--radius-md);
+  background: #f9fafb;
+  color: #9ca3af;
+  font-size: 24rpx;
+  text-align: center;
 }

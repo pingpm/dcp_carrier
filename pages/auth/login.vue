@@ -5,10 +5,28 @@
         <image class="brand-icon" src="/static/icons/truck.svg" mode="aspectFit" />
       </view>
       <view class="login-title">承运商登录</view>
+      <!-- #ifdef MP-WEIXIN -->
+      <view class="login-subtitle">微信手机号授权后可直接进入工作台</view>
+      <!-- #endif -->
+      <!-- #ifndef MP-WEIXIN -->
       <view class="login-subtitle">接收订单、维护线路、处理履约节点</view>
+      <!-- #endif -->
     </view>
 
     <view class="login-form">
+      <!-- #ifdef MP-WEIXIN -->
+      <button
+        class="primary-btn login-btn wechat-login-btn"
+        open-type="getPhoneNumber"
+        :loading="wechatLoading"
+        :disabled="wechatLoading || loading"
+        @getphonenumber="wechatPhoneLogin"
+      >
+        微信手机号快捷登录
+      </button>
+      <!-- #endif -->
+
+      <!-- #ifndef MP-WEIXIN -->
       <view class="field">
         <text class="label">手机号码</text>
         <view class="input-wrapper">
@@ -43,6 +61,7 @@
       </view>
 
       <button class="primary-btn login-btn" :loading="loading" @click="login">登录 / 注册</button>
+      <!-- #endif -->
 
       <view class="agreement-wrapper">
         <label class="agreement-checkbox" @click="toggleAgreement">
@@ -61,7 +80,7 @@
       </view>
     </view>
 
-    <view class="login-footnote">新手机号验证后自动创建承运商账号</view>
+    <view class="login-footnote">{{ loginFootnote }}</view>
   </view>
 </template>
 
@@ -75,10 +94,17 @@ export default {
       phone: '',
       verificationCode: '',
       loading: false,
+      wechatLoading: false,
       codeLoading: false,
       countdown: 0,
       countdownTimer: null,
       agreementAccepted: true,
+      // #ifdef MP-WEIXIN
+      loginFootnote: '微信手机号授权后自动创建承运商账号',
+      // #endif
+      // #ifndef MP-WEIXIN
+      loginFootnote: '新手机号验证后自动创建承运商账号',
+      // #endif
     };
   },
   onUnload() {
@@ -150,6 +176,29 @@ export default {
         this.loading = false;
       }
     },
+    async wechatPhoneLogin(event) {
+      if (!this.validateAgreement()) {
+        return;
+      }
+      const detail = event.detail || {};
+      if (detail.errMsg && !detail.errMsg.includes('ok')) {
+        uni.showToast({ title: '请授权手机号后登录', icon: 'none' });
+        return;
+      }
+      if (!detail.code) {
+        uni.showToast({ title: '微信未返回手机号授权凭证', icon: 'none' });
+        return;
+      }
+      this.wechatLoading = true;
+      try {
+        const wxCode = await miniappLoginCode();
+        const data = await api.wechatPhoneLogin(detail.code, wxCode);
+        setSession(data);
+        goAfterLogin(data);
+      } finally {
+        this.wechatLoading = false;
+      }
+    },
   },
 };
 </script>
@@ -197,6 +246,10 @@ export default {
 
 .login-form {
   width: 100%;
+}
+
+.wechat-login-btn {
+  margin-bottom: 28rpx;
 }
 
 .input-wrapper {

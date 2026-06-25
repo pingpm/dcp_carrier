@@ -28,6 +28,14 @@
       >
         小板线路
       </view>
+      <view
+        v-if="canManageRouteType('DRIVING')"
+        class="segment-item"
+        :class="{ active: activeType === 'DRIVING' }"
+        @click="switchType('DRIVING')"
+      >
+        代驾线路
+      </view>
     </view>
 
     <view v-if="routes.length" class="section route-toolbar">
@@ -44,16 +52,19 @@
         </view>
       </view>
 
-      <view class="coverage-summary-row">
-        <view class="coverage-summary-main">
-          <image class="summary-icon" src="/static/icons/map.svg" mode="aspectFit" />
-          <text class="coverage-summary-text">
-            已覆盖 {{ routeCoverageStats.originProvinceCount }} 个起始省份、{{
-              routeCoverageStats.destinationProvinceCount
-            }} 个目的省份、{{ routeCoverageStats.totalCount }} 条线路
-          </text>
+      <scroll-view class="origin-province-tabs" scroll-x show-scrollbar="false">
+        <view class="origin-province-tab-row">
+          <view
+            v-for="tab in originProvinceTabs"
+            :key="tab.key"
+            class="origin-province-tab"
+            :class="{ active: activeOriginProvinceKey === tab.key }"
+            @click.stop="switchOriginProvince(tab.key)"
+          >
+            {{ tab.label }}（{{ tab.count }}）
+          </view>
         </view>
-      </view>
+      </scroll-view>
     </view>
 
     <view v-if="routes.length === 0" class="section empty-routes-card">
@@ -77,12 +88,11 @@
         :key="route.id"
         class="section route-card"
         :class="{ closed: route.routeStatus === 'CLOSED' }"
+        @click="goEdit(route)"
       >
         <view class="row-between card-header">
           <view class="row align-center">
-            <text class="route-badge">{{
-              route.routeType === 'LARGE_TRUCK' ? '大板' : '小板'
-            }}</text>
+            <text class="route-badge">{{ routeTypeShortText(route.routeType) }}</text>
             <text
               class="route-source-tag font-bold"
               :class="route.source === 'ADMIN_ASSIGNED' ? 'admin' : 'self'"
@@ -122,14 +132,7 @@
         </view>
 
         <view class="card-actions-row">
-          <button class="plain-btn card-mini-btn" @click="goEdit(route)">编辑报价</button>
-          <button
-            v-if="route.routeStatus === 'ACTIVE'"
-            class="plain-btn card-mini-btn danger-link-btn"
-            @click="closeRoute(route)"
-          >
-            关闭展示
-          </button>
+          <button class="plain-btn card-mini-btn" @click.stop="goEdit(route)">编辑报价</button>
         </view>
       </view>
     </block>
@@ -223,10 +226,12 @@
 
     <region-picker ref="originPicker" title="选择起始地" @select="selectOrigin" />
     <region-picker ref="destinationPicker" title="选择目的地" @select="selectDestination" />
+    <miniapp-login-sheet ref="loginSheet" @success="handleLoginSuccess" />
   </view>
 </template>
 
 <script>
+import { miniappLoginPageMixin } from '../../utils/miniapp-login-page.js';
 import { api, requireLogin } from '../../utils/api.js';
 import { yuanText } from '../../utils/format.js';
 import RegionPicker from '../../components/region-picker/region-picker.vue';
@@ -249,6 +254,7 @@ function createDefaultFilters() {
 }
 
 export default {
+  mixins: [miniappLoginPageMixin],
   components: {
     RegionPicker,
   },
@@ -259,11 +265,10 @@ export default {
       verification: { reviewStatus: 'UNVERIFIED' },
       filters: createDefaultFilters(),
       draftFilters: createDefaultFilters(),
+      activeOriginProvinceKey: 'ALL',
       filterPanelVisible: false,
       statusOptions: [
-        { label: '全部', value: 'ALL' },
         { label: '展示中', value: 'ACTIVE' },
-        { label: '已关闭', value: 'CLOSED' },
       ],
       sourceOptions: [
         { label: '全部', value: 'ALL' },
@@ -279,6 +284,10 @@ export default {
   },
   methods: {
     yuanText,
+    routeTypeShortText(type) {
+      const map = { LARGE_TRUCK: '大板', SMALL_TRUCK: '小板', DRIVING: '代驾' };
+      return map[type] || '线路';
+    },
     canManageRouteType(type) {
       return this.availableRouteTypes.includes(type);
     },
@@ -297,12 +306,14 @@ export default {
     async load() {
       try {
         const res = await api.routes(
-          { routeType: this.activeType },
+          { routeType: this.activeType, routeStatus: 'ACTIVE' },
           { silent: true, authRedirect: false },
         );
         this.routes = res.items || [];
+        this.ensureActiveProvinceTab();
       } catch (err) {
         this.routes = [];
+        this.activeOriginProvinceKey = 'ALL';
       }
     },
     switchType(type) {
@@ -371,10 +382,28 @@ export default {
     applyFilters() {
       this.filters = { ...this.draftFilters };
       this.filterPanelVisible = false;
+      this.ensureActiveProvinceTab();
     },
     resetFilters() {
       this.filters = createDefaultFilters();
       this.draftFilters = createDefaultFilters();
+      this.activeOriginProvinceKey = 'ALL';
+    },
+    switchOriginProvince(key) {
+      this.activeOriginProvinceKey = key;
+    },
+    getOriginProvinceKey(route) {
+      const id = route.originProvinceId || route.originProvinceName || '';
+      return String(id);
+    },
+    ensureActiveProvinceTab() {
+      if (this.activeOriginProvinceKey === 'ALL') return;
+      const exists = this.originProvinceTabs.some(
+        (tab) => tab.key === this.activeOriginProvinceKey,
+      );
+      if (!exists) {
+        this.activeOriginProvinceKey = 'ALL';
+      }
     },
     goStatus() {
       const url =
@@ -386,10 +415,10 @@ export default {
     goAdd() {
       const caps = this.verification.serviceCapabilities || [];
       if (!caps.includes(this.activeType)) {
-        const nameMap = { LARGE_TRUCK: '大板线路', SMALL_TRUCK: '小板线路' };
+        const nameMap = { LARGE_TRUCK: '大板线路', SMALL_TRUCK: '小板线路', DRIVING: '代驾线路' };
         uni.showModal({
           title: '线路类型不可用',
-          content: `当前公司类型不支持添加【${nameMap[this.activeType]}】。轿运公司支持大板和小板线路，道路救援公司仅支持小板线路。`,
+          content: `当前认证资料不支持添加【${nameMap[this.activeType]}】，请先调整服务能力并通过审核。`,
           confirmText: '去认证页',
           confirmColor: '#1677ff',
           success: (res) => {
@@ -404,23 +433,6 @@ export default {
     },
     goEdit(route) {
       uni.navigateTo({ url: `/pages/route/form?routeId=${route.id}&type=${route.routeType}` });
-    },
-    closeRoute(route) {
-      uni.showModal({
-        title: '关闭展示确认',
-        content:
-          '确定关闭该承运线路吗？关闭后，车商客户搜索该线路时将无法看到您的报价，您可以重新在编辑页中开启展示。',
-        confirmColor: '#dc2626',
-        success: async (res) => {
-          if (res.confirm) {
-            try {
-              await api.closeRoute(route.id);
-              uni.showToast({ title: '线路已关闭展示', icon: 'success' });
-              this.load();
-            } catch (err) {}
-          }
-        },
-      });
     },
   },
   computed: {
@@ -453,10 +465,11 @@ export default {
         !this.filters.originNationwide ||
         !this.filters.destinationNationwide ||
         this.filters.routeStatus !== 'ALL' ||
-        this.filters.source !== 'ALL'
+        this.filters.source !== 'ALL' ||
+        this.activeOriginProvinceKey !== 'ALL'
       );
     },
-    filteredRoutes() {
+    baseFilteredRoutes() {
       return this.routes.filter((route) => {
         const originMatched =
           this.filters.originNationwide ||
@@ -470,27 +483,39 @@ export default {
         return originMatched && destinationMatched && statusMatched && sourceMatched;
       });
     },
-    routeCoverageStats() {
-      const originProvinces = new Set();
-      const destinationProvinces = new Set();
-      let activeCount = 0;
-      this.routes.forEach((route) => {
-        if (route.originProvinceName) originProvinces.add(route.originProvinceName);
-        if (route.destinationProvinceName) destinationProvinces.add(route.destinationProvinceName);
-        if (route.routeStatus === 'ACTIVE') activeCount += 1;
+    filteredRoutes() {
+      if (this.activeOriginProvinceKey === 'ALL') return this.baseFilteredRoutes;
+      return this.baseFilteredRoutes.filter(
+        (route) => this.getOriginProvinceKey(route) === this.activeOriginProvinceKey,
+      );
+    },
+    originProvinceTabs() {
+      const provinceMap = new Map();
+      this.baseFilteredRoutes.forEach((route) => {
+        const key = this.getOriginProvinceKey(route);
+        if (!key || !route.originProvinceName) return;
+        if (!provinceMap.has(key)) {
+          provinceMap.set(key, {
+            key,
+            label: route.originProvinceName,
+            count: 0,
+          });
+        }
+        provinceMap.get(key).count += 1;
       });
-      return {
-        totalCount: this.routes.length,
-        originProvinceCount: originProvinces.size,
-        destinationProvinceCount: destinationProvinces.size,
-        activeCount,
-      };
+      return [
+        { key: 'ALL', label: '全部', count: this.baseFilteredRoutes.length },
+        ...Array.from(provinceMap.values()),
+      ];
     },
     availableRouteTypes() {
       const caps = this.verification.serviceCapabilities || [];
-      if (caps.includes('LARGE_TRUCK')) return ['LARGE_TRUCK', 'SMALL_TRUCK'];
-      if (caps.includes('SMALL_TRUCK')) return ['SMALL_TRUCK'];
-      return ['LARGE_TRUCK', 'SMALL_TRUCK'];
+      const allowed = ['LARGE_TRUCK', 'SMALL_TRUCK', 'DRIVING'].filter((type) =>
+        caps.includes(type),
+      );
+      if (allowed.length) return allowed;
+      if (this.verification.companyType === 'ROADSIDE_RESCUE') return ['SMALL_TRUCK', 'DRIVING'];
+      return ['LARGE_TRUCK', 'SMALL_TRUCK', 'DRIVING'];
     },
   },
 };
@@ -533,8 +558,7 @@ export default {
   gap: 18rpx;
 }
 
-.filter-summary-row,
-.coverage-summary-row {
+.filter-summary-row {
   min-height: 68rpx;
   display: flex;
   align-items: center;
@@ -543,15 +567,13 @@ export default {
 }
 
 .filter-summary-main,
-.coverage-summary-main,
 .filter-summary-side {
   min-width: 0;
   display: flex;
   align-items: center;
 }
 
-.filter-summary-main,
-.coverage-summary-main {
+.filter-summary-main {
   flex: 1;
   gap: 12rpx;
 }
@@ -578,8 +600,7 @@ export default {
   font-weight: 800;
 }
 
-.filter-summary-side,
-.coverage-link {
+.filter-summary-side {
   flex-shrink: 0;
   gap: 8rpx;
   color: #1677ff;
@@ -592,19 +613,37 @@ export default {
   font-weight: 700;
 }
 
-.coverage-summary-row {
+.origin-province-tabs {
+  width: 100%;
   padding-top: 18rpx;
   border-top: 1rpx solid #eef2f7;
+  white-space: nowrap;
 }
 
-.coverage-summary-text {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.origin-province-tab-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 14rpx;
+  min-width: 100%;
+}
+
+.origin-province-tab {
+  flex-shrink: 0;
+  height: 56rpx;
+  line-height: 56rpx;
+  padding: 0 22rpx;
+  border-radius: 28rpx;
+  background: #f8fafc;
+  border: 1rpx solid #e2e8f0;
   color: #475569;
-  font-size: 24rpx;
-  font-weight: 700;
+  font-size: 23rpx;
+  font-weight: 800;
+}
+
+.origin-province-tab.active {
+  color: #1677ff;
+  background: #eff6ff;
+  border-color: #93c5fd;
 }
 
 .empty-routes-card {
@@ -646,8 +685,30 @@ export default {
 }
 
 .route-card {
+  position: relative;
   padding: 30rpx;
   border: 1rpx solid rgba(229, 231, 235, 0.5);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.route-card::after {
+  content: '›';
+  position: absolute;
+  right: 30rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #cbd5e1;
+  font-size: 42rpx;
+  font-weight: 300;
+}
+
+.route-card:active {
+  transform: scale(0.99);
+  border-color: #bfdbfe;
+  box-shadow: 0 8rpx 24rpx rgba(22, 119, 255, 0.08);
 }
 
 .route-card.closed {
@@ -730,6 +791,7 @@ export default {
   gap: 16rpx;
   border-top: 1rpx dashed #f3f4f6;
   padding-top: 20rpx;
+  padding-right: 40rpx;
 }
 
 .card-mini-btn {

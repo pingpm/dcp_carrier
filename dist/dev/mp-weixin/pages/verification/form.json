@@ -1,4 +1,8 @@
 {
   "navigationBarTitleText": "承运商认证",
-  "usingComponents": {}
+  "usingComponents": {
+    "address-map-picker": "../../components/address-map-picker/address-map-picker",
+    "carrier-image-uploader": "../../components/carrier-image-uploader/carrier-image-uploader",
+    "region-select-field": "../../components/region-select-field/region-select-field"
+  }
 }

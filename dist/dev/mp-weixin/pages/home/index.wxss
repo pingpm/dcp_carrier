@@ -44,6 +44,11 @@
   color: #1677ff;
   font-weight: bold;
 }
+.text-link-row {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
 .wallet-values-row {
   display: flex;
   align-items: center;

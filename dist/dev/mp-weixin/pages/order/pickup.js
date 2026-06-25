@@ -1,22 +1,19 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-const RegionPicker = () => "../../components/region-picker/region-picker.js";
+const CarrierImageUploader = () => "../../components/carrier-image-uploader/carrier-image-uploader.js";
 const _sfc_main = {
   components: {
-    RegionPicker
+    CarrierImageUploader
   },
   data() {
     return {
       orderId: "",
-      pickupTime: "",
-      provinceId: "",
-      provinceName: "",
-      cityId: "",
-      cityName: "",
-      addressDetail: "",
+      checkingDriver: false,
       remark: "",
       mediaFiles: [],
-      // Array of { fileId, fileUrl }
+      pickupExampleImage: "",
+      mediaMinCount: 1,
+      mediaMaxCount: 9,
       uploading: false,
       submitting: false
     };
@@ -25,45 +22,73 @@ const _sfc_main = {
     if (!common_vendor.requireLogin())
       return;
     this.orderId = options.orderId;
-    const d = /* @__PURE__ */ new Date();
-    this.pickupTime = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    this.loadExampleImages();
+    this.loadMediaLimits();
+    this.ensurePickupDriver();
+  },
+  computed: {
+    mediaLimitTip() {
+      return `请上传${this.mediaMinCount}-${this.mediaMaxCount}张现场验车照片（需包含车辆四周外表）`;
+    }
   },
   methods: {
-    onDateChange(e) {
-      this.pickupTime = e.detail.value;
+    async loadExampleImages() {
+      try {
+        const data = await common_vendor.api.exampleImageConfigs();
+        const item = (data.items || []).find(
+          (config) => config.urlKey === "carrier_pickup_photo_example_url"
+        );
+        this.pickupExampleImage = (item == null ? void 0 : item.enabled) && (item == null ? void 0 : item.url) ? item.url : "";
+      } catch (error) {
+        this.pickupExampleImage = "";
+      }
     },
-    openRegionPicker() {
-      this.$refs.regionPicker.open();
+    async loadMediaLimits() {
+      try {
+        const data = await common_vendor.api.carrierOrderMediaLimits();
+        const pickup = data.pickup || {};
+        this.mediaMinCount = Number(pickup.minCount) || 1;
+        this.mediaMaxCount = Number(pickup.maxCount) || 9;
+      } catch (error) {
+        this.mediaMinCount = 1;
+        this.mediaMaxCount = 9;
+      }
     },
-    onRegionSelect(region) {
-      this.provinceId = region.provinceId;
-      this.provinceName = region.provinceName;
-      this.cityId = region.cityId;
-      this.cityName = region.cityName;
-    },
-    previewImg(url) {
-      common_vendor.index.previewImage({ urls: [url] });
-    },
-    chooseMedia() {
-      if (this.uploading)
+    async ensurePickupDriver() {
+      var _a;
+      if (!this.orderId || this.checkingDriver)
         return;
-      common_vendor.index.chooseImage({
-        count: 9 - this.mediaFiles.length,
-        success: async (res) => {
-          this.uploading = true;
-          try {
-            for (const path of res.tempFilePaths) {
-              const file = await common_vendor.uploadFile(path, "IMAGE", "PICKUP_VERIFICATION");
-              this.mediaFiles.push({ fileId: file.fileId, fileUrl: file.fileUrl });
+      this.checkingDriver = true;
+      try {
+        const data = await common_vendor.api.orderDetail(this.orderId);
+        const pickupDriver = (_a = data.order) == null ? void 0 : _a.driverInfo;
+        if (!(pickupDriver == null ? void 0 : pickupDriver.driverName) || !(pickupDriver == null ? void 0 : pickupDriver.driverPhone)) {
+          common_vendor.index.showModal({
+            title: "请先设置提车司机",
+            content: "确认提车前必须先设置提车司机。您可以立即设置，也可以稍后再操作。",
+            confirmText: "去设置",
+            cancelText: "稍后",
+            confirmColor: "#1677ff",
+            success: (res) => {
+              if (res.confirm) {
+                common_vendor.index.redirectTo({
+                  url: `/pages/order/driver-form?orderId=${this.orderId}&driverType=PICKUP`
+                });
+              } else {
+                if (getCurrentPages().length > 1) {
+                  common_vendor.index.navigateBack();
+                } else {
+                  common_vendor.index.redirectTo({ url: `/pages/order/detail?orderId=${this.orderId}` });
+                }
+              }
             }
-          } finally {
-            this.uploading = false;
-          }
+          });
         }
-      });
-    },
-    deleteFile(index) {
-      this.mediaFiles.splice(index, 1);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        this.checkingDriver = false;
+      }
     },
     async useDevPickupPhotos() {
       if (this.uploading)
@@ -82,20 +107,12 @@ const _sfc_main = {
       }
     },
     validate() {
-      if (!this.pickupTime) {
-        common_vendor.index.showToast({ title: "请选择提车时间", icon: "none" });
+      if (this.mediaFiles.length < this.mediaMinCount) {
+        common_vendor.index.showToast({ title: `请至少上传${this.mediaMinCount}张验车图片`, icon: "none" });
         return false;
       }
-      if (!this.provinceName || !this.cityName) {
-        common_vendor.index.showToast({ title: "请选择提车省市", icon: "none" });
-        return false;
-      }
-      if (!this.addressDetail.trim()) {
-        common_vendor.index.showToast({ title: "请输入提车详细地址", icon: "none" });
-        return false;
-      }
-      if (!this.mediaFiles.length) {
-        common_vendor.index.showToast({ title: "请上传至少一张验车图片", icon: "none" });
+      if (this.mediaFiles.length > this.mediaMaxCount) {
+        common_vendor.index.showToast({ title: `最多上传${this.mediaMaxCount}张验车图片`, icon: "none" });
         return false;
       }
       return true;
@@ -106,14 +123,6 @@ const _sfc_main = {
       this.submitting = true;
       try {
         const payload = {
-          pickupTime: new Date(this.pickupTime).toISOString(),
-          address: {
-            provinceId: this.provinceId,
-            provinceName: this.provinceName,
-            cityId: this.cityId,
-            cityName: this.cityName,
-            detail: this.addressDetail
-          },
           mediaFileIds: this.mediaFiles.map((f) => f.fileId),
           remark: this.remark
         };
@@ -131,51 +140,33 @@ const _sfc_main = {
   }
 };
 if (!Array) {
-  const _easycom_region_picker2 = common_vendor.resolveComponent("region-picker");
-  _easycom_region_picker2();
+  const _easycom_carrier_image_uploader2 = common_vendor.resolveComponent("carrier-image-uploader");
+  _easycom_carrier_image_uploader2();
 }
-const _easycom_region_picker = () => "../../components/region-picker/region-picker.js";
+const _easycom_carrier_image_uploader = () => "../../components/carrier-image-uploader/carrier-image-uploader.js";
 if (!Math) {
-  _easycom_region_picker();
+  _easycom_carrier_image_uploader();
 }
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return common_vendor.e({
-    a: common_vendor.t($data.pickupTime || "选择提车日期"),
-    b: common_vendor.o((...args) => $options.onDateChange && $options.onDateChange(...args), "69"),
-    c: $data.provinceName
-  }, $data.provinceName ? {
-    d: common_vendor.t($data.provinceName),
-    e: common_vendor.t($data.cityName)
-  } : {}, {
-    f: common_vendor.o((...args) => $options.openRegionPicker && $options.openRegionPicker(...args), "6f"),
-    g: $data.addressDetail,
-    h: common_vendor.o(($event) => $data.addressDetail = $event.detail.value, "c0"),
-    i: $data.remark,
-    j: common_vendor.o(($event) => $data.remark = $event.detail.value, "bb"),
-    k: common_vendor.t($data.mediaFiles.length),
-    l: common_vendor.n($data.mediaFiles.length ? "status-success" : "status-warning"),
-    m: common_vendor.f($data.mediaFiles, (file, index, i0) => {
-      return {
-        a: file.fileUrl,
-        b: common_vendor.o(($event) => $options.previewImg(file.fileUrl), file.fileId),
-        c: common_vendor.o(($event) => $options.deleteFile(index), file.fileId),
-        d: file.fileId
-      };
+  return {
+    a: common_vendor.o(($event) => $data.uploading = $event, "7a"),
+    b: common_vendor.o(($event) => $data.mediaFiles = $event, "ba"),
+    c: common_vendor.p({
+      title: "验车影像资料",
+      tip: $options.mediaLimitTip,
+      ["usage-scene"]: "PICKUP_INSPECTION",
+      ["max-count"]: $data.mediaMaxCount,
+      ["add-text"]: "添加图片",
+      required: true,
+      compact: true,
+      ["example-src"]: $data.pickupExampleImage,
+      modelValue: $data.mediaFiles
     }),
-    n: $data.mediaFiles.length < 9
-  }, $data.mediaFiles.length < 9 ? {
-    o: common_vendor.t($data.uploading ? "⏳" : "+"),
-    p: common_vendor.t($data.uploading ? "上传中..." : "添加图片"),
-    q: common_vendor.o((...args) => $options.chooseMedia && $options.chooseMedia(...args), "cb")
-  } : {}, {
-    r: common_vendor.sr("regionPicker", "205a0fb5-0"),
-    s: common_vendor.o($options.onRegionSelect, "4b"),
-    t: common_vendor.p({
-      title: "选择提车省市"
-    }),
-    v: $data.submitting,
-    w: common_vendor.o((...args) => $options.submit && $options.submit(...args), "25")
-  });
+    d: $data.remark,
+    e: common_vendor.o(($event) => $data.remark = $event.detail.value, "da"),
+    f: $data.submitting,
+    g: common_vendor.o((...args) => $options.submit && $options.submit(...args), "bd")
+  };
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);
 wx.createPage(MiniProgramPage);
